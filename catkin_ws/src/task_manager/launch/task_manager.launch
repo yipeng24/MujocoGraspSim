@@ -1,0 +1,17 @@
+<launch>
+  <arg name="config_path"  default="$(find task_manager)/cfg/config.yaml"/>
+  <arg name="auto_start"   default="false"/>
+
+  <!-- 遮挡分析节点 -->
+  <node pkg="task_manager" type="occlusion_analyzer.py" name="occlusion_analyzer"
+        output="screen" respawn="true">
+    <param name="config_path" value="$(arg config_path)"/>
+  </node>
+
+  <!-- 任务状态机节点 -->
+  <node pkg="task_manager" type="task_fsm.py" name="task_fsm"
+        output="screen" respawn="false">
+    <param name="config_path" value="$(arg config_path)"/>
+    <param name="auto_start"  value="$(arg auto_start)"/>
+  </node>
+</launch>

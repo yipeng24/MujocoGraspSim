@@ -1,0 +1,99 @@
+# Drone Grasp
+空中机器人抓取仿真
+
+## 1. Quick start
+
+### Build
+set config file path in line 7 of "tl_fsm_node.cpp"   
+set "CUDA_NVCC_FLAGS" in "local_sensing/CMakeLists.txt" 
+[cuda_arch](https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/)
+
+```
+sudo apt install ros-$ROS_DISTRO-can-msgs
+sudo apt-get install ros-$ROS_DISTRO-octomap-ros
+sudo apt-get install ros-$ROS_DISTRO-octomap-msgs
+sudo apt-get install ros-$ROS_DISTRO-octomap-server
+sudo apt-get install ros-$ROS_DISTRO-mavros
+sudo apt-get install ros-$ROS_DISTRO-mavros-extras
+sudo apt-get install libgoogle-glog-dev
+```
+
+```
+catkin_make -DCATKIN_WHITELIST_PACKAGES="quadrotor_msgs"
+catkin_make -DCATKIN_WHITELIST_PACKAGES="mav_msgs"
+catkin_make -DCATKIN_WHITELIST_PACKAGES="grasp_chassis_comm"
+catkin_make -DCATKIN_WHITELIST_PACKAGES="" -DCMAKE_BUILD_TYPE=Release
+```
+
+```
+catkin build
+```
+
+### Run
+- **Gazebo**  
+带动力学仿真  
+```
+ sh src/scripts/run_gazebo.sh
+```
+1. RVIZ 中 2D Pose Estimate 起飞
+2. Publish Point 切换自动飞行  
+3. 2D Nav Goal 指定目标点
+
+
+- **Gazebo**  
+无动力学仿真
+```
+rviz -d ${工作空间路径}/src/Single-Drone-Planner/planning/planning/config/goal_rviz.rviz
+roslaunch mapping test_mapping.launch
+roslaunch planning simulation_rviz_goal.launch
+```
+
+
+## 2. Config
+- **Gazebo**
+  - ***修改仿真环境***  
+    Change params in 'basic_clutter1.world' like the visual mesh or the pose of planks
+
+- **Goal Method**  
+  change "sdf_map/goal_method" in 'simulation_gazebo(rviz).launch'
+
+## 4. Launch File Construction
+
+```
+run_gazebo.sh
+├─ rotors_gazebo simulator_test_mpc.launch
+│   ├─ \$(find gazebo_ros)/launch/empty_world.launch
+│   └─ \$(find rotors_gazebo)/launch/spawn_mav.launch
+│       └─ = 加载机器人模型参数  
+├─ px4ctrl run_ctrl.launch
+│   └─ = 启动 px4ctrl node
+├─ planning simulation_gazebo.launch
+│   ├─ [node] odom_visualization
+|   └─ [node] planning
+|       ├─ ch_rc_sdf
+|       |   └─ = multi-link robo-centric SDF
+|       └─ planning
+|           └─ = whole-body planning (xyz+yaw+arm)
+|           
+└─ bridge_node test_node.launch  
+```
+
+
+```
+run_rviz.sh
+├─ planning simulation_rviz_goal.launch
+│   ├─ [node] odom_visualization
+|   └─ [node] planning
+|       ├─ ch_rc_sdf
+|       |   └─ = multi-link robo-centric SDF
+|       └─ planning
+|           └─ = whole-body planning (xyz+yaw+arm)
+├─ mapping test_mapping.launch
+|   ├─ [node] mockamap_node
+|   ├─ [node] pcl_render_node
+|   └─ [node] map
+|       └ = ??
+└─ bridge_node test_node.launch  
+```
+
+## 3. Acknowledgement

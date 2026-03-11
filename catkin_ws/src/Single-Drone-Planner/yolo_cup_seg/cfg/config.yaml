@@ -1,0 +1,57 @@
+# 话题设置
+sync_frame_topic: "/sync_frame_img"
+
+# 模型参数
+model:
+  # 请确保这里是绝对路径，或者相对于运行目录的正确路径
+  path: "/home/jr/proj/airgrasp/planner_ws/src/Single-Drone-Planner/yolo_cup_seg/weights/best.pt"
+  conf: 0.5
+  imgsz: 640
+  device: "auto"
+  alpha: 0.5
+
+# 深度与点云参数
+depth:
+  encoding: "auto"
+  scale: 0.001
+  min: 0.1
+  max: 6.0
+
+point_cloud:
+  stride: 2
+  publish_empty: true
+  fg_class_ids: "auto"  # "auto", "0,1" etc.
+
+
+# 相机内参
+camera:
+  K: [615.16552734375, 0.0, 334.2502136230469, 
+      0.0, 615.2965698242188, 231.13877868652344, 
+      0.0, 0.0, 1.0]
+
+# ! extract images from bag 使用的配置参数 ! #
+# Bag 读取与提取路径设置 (新增)
+bag_settings:
+  # 文件夹模式：自动处理该文件夹中所有.bag文件
+  path: "/home/jr/proj/airgrasp/planner_ws/bag/1201_realsense"
+  # 其他模式示例：
+  # 单文件模式: path: "/path/to/single.bag"
+  # 列表模式: 
+  #   path:
+  #     - "/path/to/bag1.bag"
+  #     - "/path/to/bag2.bag"
+  output_dir: "/home/jr/proj/airgrasp/planner_ws/bag/1201_realsense/sam3d_dataset"
+  extract_mask: true  # 是否提取mask (需要YOLO模型)
+  frame_interval: 5    # 帧间隔: 1=每帧都提取, 5=每5帧提取一次, 10=每10帧提取一次
+  min_mask_area: 1000  # 最小mask面积(像素数)，小于此值将跳过保存
+  keep_largest_component: false  # 是否只保留最大连通域
+
+# 话题与同步设置 (新增)
+topics:
+  rgb: "/d435/color/image_raw"
+  depth: "/d435/aligned_depth_to_color/image_raw"
+sync:
+  time_threshold: 0.05
+
+# 控制点云可视化
+en_vis: true  # 设为 true 则发布独立的点云话题

@@ -1,0 +1,289 @@
+<launch>
+  <!-- Ensure wall time is used (not simulated time) -->
+  <param name="use_sim_time" value="false"/>
+
+  <!--
+    mujoco_sim.launch
+    ================
+    Complete simulation stack for:
+      planner -> /position_cmd -> px4ctrl -> /attitude_cmd -> mujoco -> /odom -> px4ctrl
+
+    Startup procedure (after roslaunch):
+      1. Wait for "[mavros_sim] Fake MAVROS ready" and "[px4ctrl] Waiting for ..."
+      2. Trigger takeoff:
+           rostopic pub -1 /px4ctrl/takeoff_land quadrotor_msgs/TakeoffLand "takeoff_land_cmd: 1"
+      3. Drone ascends to 1 m in MuJoCo viewer.
+      4. /traj_start_trigger is published -> planner may start sending /position_cmd.
+      5. px4ctrl transitions to CMD_CTRL and follows the trajectory.
+  -->
+
+  <arg name="model_path"    default="$(find drone_urdf)/scene_drone.xml"/>
+  <arg name="use_planning"  default="false"/>
+  <arg name="use_keyboard"  default="false"/>  <!-- true: 用键盘(key_to_joy_UAM)控制飞机位置 -->
+  <arg name="use_viewer"    default="false"/>   <!-- true: 弹出 MuJoCo 3D 窗口 -->
+  <arg name="use_depth"     default="false"/>   <!-- true: 发布深度相机点云 /depth_cam/points -->
+  <arg name="use_goal_picker" default="false"/> <!-- true: 弹出目标点选取窗口（G键设置目标） -->
+
+  <!--
+    感知流水线选项（三选一，不可同时开启）：
+      use_planning:      原版 — 无分割深度相机 + planning
+      use_gt_pipeline:   主线  — MuJoCo GT Seg → split PCL → planning
+      use_yoloe_pipeline: 对照线 — RGB+Depth → YOLOE → split PCL → planning
+  -->
+  <arg name="use_gt_pipeline"    default="false"/>
+  <arg name="use_yoloe_pipeline" default="false"/>
+  <arg name="show_camera_view"   default="false"/>
+  <arg name="camera_view_topic"  default="/rgb_depth/image_rgb"/>
+
+  <!-- ================================================================ -->
+  <!-- 1. MuJoCo physics + visualization                                 -->
+  <!-- Subscribes: /attitude_cmd  |  Publishes: /odom, /visual_odom     -->
+  <!-- ================================================================ -->
+  <node pkg="mujoco_bridge" type="mujoco_ros_bridge.py"
+        name="mujoco_ros_bridge" output="screen" required="true">
+    <param name="model_path"     value="$(arg model_path)"/>
+    <param name="use_viewer"     value="$(arg use_viewer)"/>
+    <param name="planning_mode"  value="$(arg use_planning)"/>
+  </node>
+
+  <!-- ================================================================ -->
+  <!-- 2. Fake MAVROS interface                                          -->
+  <!-- Relays: /mavros/setpoint_raw/attitude -> /attitude_cmd           -->
+  <!-- Provides: /mavros/state, /mavros/imu/data, /mavros/battery,      -->
+  <!--           /mavros/set_mode, /mavros/cmd/arming services          -->
+  <!-- ================================================================ -->
+  <node pkg="mavros_sim" type="mavros_sim.py"
+        name="mavros_sim" output="screen" required="true"/>
+
+  <!-- ================================================================ -->
+  <!-- 3. PX4 position controller                                        -->
+  <!-- Subscribes: /odom, /position_cmd, /mavros/*                      -->
+  <!-- Publishes:  /mavros/setpoint_raw/attitude                        -->
+  <!-- ================================================================ -->
+  <node pkg="px4ctrl" type="px4ctrl_node" name="px4ctrl" output="screen">
+
+    <!-- Load base parameters from yaml -->
+    <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml"/>
+    <rosparam command="load" file="$(find px4ctrl)/config/ctrl_param_fpv.yaml"/>
+
+    <!-- Override: disable RC requirement so px4ctrl works in simulation -->
+    <param name="auto_takeoff_land/no_RC" value="true"/>
+
+    <!-- Topic remappings (match mujoco_bridge and planner) -->
+    <remap from="~odom"            to="/odom"/>
+    <remap from="~cmd"             to="/position_cmd"/>
+    <remap from="~joint_state_est" to="/joint_states"/>
+    <remap from="~joint_state_cmd" to="/joint_state_cmd"/>
+    <remap from="~joy_cmd"         to="/joy_free"/>
+    <remap from="~takeoff_land"    to="/px4ctrl/takeoff_land"/>
+  </node>
+
+  <!-- ================================================================ -->
+  <!-- 4. (Optional) Keyboard position control                          -->
+  <!-- Enable with: use_keyboard:=true                                  -->
+  <!--                                                                  -->
+  <!-- key_to_joy_UAM.py  — pygame 键盘窗口，发布 /joy_free            -->
+  <!--   5 = MODE  切换 MANUAL ↔ PLANNING 模式                         -->
+  <!--   6 = GEAR  就地悬停                                             -->
+  <!--   WASD/QE/←→  飞行控制                                          -->
+  <!--                                                                  -->
+  <!-- joy_to_position_cmd.py — 转换 Joy → /position_cmd               -->
+  <!--   MANUAL 模式: 键盘积分位置 → /position_cmd                     -->
+  <!--   PLANNING 模式: 透传 /position_cmd_planner → /position_cmd     -->
+  <!-- ================================================================ -->
+  <group if="$(arg use_keyboard)">
+    <!-- 键盘捕获窗口 (pygame) -->
+    <node pkg="drone_tools" type="key_to_joy_UAM.py"
+          name="key_to_joy" output="screen"/>
+
+    <!-- Joy → PositionCommand 转换器（含模式切换逻辑）-->
+    <node pkg="drone_tools" type="joy_to_position_cmd.py"
+          name="joy_to_position_cmd" output="screen">
+      <param name="vel"          value="0.5"/>   <!-- m/s 移动速度 -->
+      <param name="omega"        value="0.5"/>   <!-- rad/s 偏航速度 -->
+      <param name="smooth_alpha" value="0.2"/>   <!-- 低通平滑系数，减少松键后晃动 -->
+      <param name="arm_speed"    value="1.0"/>   <!-- rad/s 机械臂速度 -->
+      <param name="deadzone"     value="0.05"/>  <!-- 摇杆死区 -->
+    </node>
+  </group>
+
+  <!-- ================================================================ -->
+  <!-- 5. (Optional) Depth camera point cloud publisher                 -->
+  <!-- Enable with: use_depth:=true                                     -->
+  <!-- Publishes: /depth_cam/points, /depth_cam/camera_info             -->
+  <!-- ================================================================ -->
+  <group if="$(arg use_depth)">
+    <node pkg="mujoco_bridge" type="mujoco_depth_pub.py"
+          name="mujoco_depth_pub" output="screen">
+      <param name="model_path"   value="$(arg model_path)"/>
+      <param name="publish_hz"   value="10.0"/>
+      <param name="width"        value="424"/>
+      <param name="height"       value="240"/>
+      <param name="fovy"         value="60.0"/>
+      <param name="depth_min"    value="0.15"/>
+      <param name="depth_max"    value="5.0"/>
+    </node>
+  </group>
+
+  <!-- ================================================================ -->
+  <!-- 6. (Optional) Goal picker viewer                                  -->
+  <!-- Enable with: use_goal_picker:=true                               -->
+  <!-- Double-click map → set goal  |  H → hover in place              -->
+  <!-- planning_mode is auto-set to match use_planning                  -->
+  <!-- ================================================================ -->
+  <group if="$(arg use_goal_picker)">
+    <node pkg="drone_tools" type="mujoco_goal_picker.py"
+          name="mujoco_goal_picker" output="screen">
+      <!-- planning_mode=true  → publish PoseStamped to /move_base_simple/goal -->
+      <!-- planning_mode=false → publish PositionCommand to /position_cmd      -->
+      <param name="planning_mode" value="$(arg use_planning)"/>
+    </node>
+  </group>
+
+  <!-- ================================================================ -->
+  <!-- 7. (Optional) Global planning stack (Single-Drone-Planner)       -->
+  <!-- Enable with: use_planning:=true  (implies depth camera is on)    -->
+  <!-- Startup: takeoff first, then double-click goal in goal_picker    -->
+  <!--          or: rostopic pub /move_base_simple/goal ...             -->
+  <!-- Pipeline:                                                         -->
+  <!--   depth_cam → SyncFrame → MapInterface (obstacle map)           -->
+  <!--   goal (/move_base_simple/goal) → RRT* → traj_server            -->
+  <!--   traj_server → /position_cmd → px4ctrl                         -->
+  <!-- NOTE: rebuild required after C++ edits (see below)               -->
+  <!--   docker exec -it mujoco_ros1_dev bash                           -->
+  <!--   cd /workspace &amp;&amp; catkin_make -only-pkg-with-deps planning     -->
+  <!-- ================================================================ -->
+  <group if="$(arg use_planning)">
+
+    <!-- 7a. Depth camera + SyncFrame publisher (障碍物地图数据源) -->
+    <node pkg="mujoco_bridge" type="mujoco_depth_pub.py"
+          name="mujoco_depth_pub_planning" output="screen">
+      <param name="model_path"        value="$(arg model_path)"/>
+      <param name="publish_hz"        value="10.0"/>
+      <param name="width"             value="424"/>
+      <param name="height"            value="240"/>
+      <param name="fovy"              value="60.0"/>
+      <param name="depth_min"         value="0.15"/>
+      <param name="depth_max"         value="5.0"/>
+      <param name="publish_syncframe" value="true"/>
+      <param name="syncframe_topic"   value="/sync_frame_pcl_world"/>
+    </node>
+
+    <!-- 7b. Planning node (traj_server embedded, publishes /position_cmd) -->
+    <!-- IMPORTANT: requires rebuild after tl_fsm_node.cpp changes:        -->
+    <!--   catkin_make -only-pkg-with-deps planning                       -->
+    <node pkg="planning" type="planning" name="planning" output="screen">
+
+      <!-- config.yaml path (required - replaces old hardcoded path) -->
+      <param name="config_path" value="$(find planning)/config/config.yaml"/>
+
+      <!-- Robot parameters (arm geometry, etc.) -->
+      <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml"/>
+
+      <!-- SDF map: obstacles + planning bounds -->
+      <param name="sdf_map/goal_method"         value="1"/>   <!-- 1=FULL_STATE_GOAL (UAMFullState.theta 被使用) -->
+      <param name="sdf_map/ground_height"        value="-0.5"/>
+      <param name="sdf_map/obstacles_inflation"  value="0.099"/>
+      <param name="sdf_map/local_bound_inflate"  value="0.5"/>
+      <param name="sdf_map/local_map_margin"     value="50"/>
+      <param name="sdf_map/default_dist"         value="5.0"/>
+      <param name="sdf_map/p_hit"  value="0.65"/>
+      <param name="sdf_map/p_miss" value="0.35"/>
+      <param name="sdf_map/p_min"  value="0.12"/>
+      <param name="sdf_map/p_max"  value="0.90"/>
+      <param name="sdf_map/p_occ"  value="0.80"/>
+      <param name="sdf_map/min_ray_length" value="0.2"/>
+      <param name="sdf_map/max_ray_length" value="5.0"/>
+      <param name="sdf_map/virtual_ceil_height" value="-10"/>
+      <param name="sdf_map/optimistic"   value="true" type="bool"/>
+      <param name="sdf_map/signed_dist"  value="true" type="bool"/>
+
+      <!-- env_map bounds (world box for planning) -->
+      <param name="env_map/resolution"   value="0.05"/>
+      <param name="env_map/map_size_x"   value="10.0"/>
+      <param name="env_map/map_size_y"   value="10.0"/>
+      <param name="env_map/map_size_z"   value="3.0"/>
+      <param name="env_map/map_center_x" value="0.0"/>
+      <param name="env_map/map_center_y" value="0.0"/>
+      <param name="env_map/map_center_z" value="1.5"/>
+
+      <!-- tgt_map (target object map - not used for navigation) -->
+      <param name="tgt_map/resolution"   value="0.05"/>
+      <param name="tgt_map/map_size_x"   value="1.0"/>
+      <param name="tgt_map/map_size_y"   value="1.0"/>
+      <param name="tgt_map/map_size_z"   value="1.0"/>
+      <param name="tgt_map/map_center_x" value="0.0"/>
+      <param name="tgt_map/map_center_y" value="0.0"/>
+      <param name="tgt_map/map_center_z" value="1.0"/>
+
+      <!-- SyncFrame-based obstacle map -->
+      <param name="use_world_pcl"    value="true"/>
+      <param name="syncframe_topic"  value="/sync_frame_pcl_world"/>
+
+      <!-- map_ros visualization params -->
+      <param name="map_ros/frame_id"      value="world"/>
+      <param name="map_ros/show_all_map"  value="true"/>
+      <param name="map_ros/show_occ_time" value="false"/>
+      <param name="map_ros/show_esdf_time" value="false"/>
+      <param name="map_ros/esdf_slice_height" value="1.0"/>
+      <param name="map_ros/visualization_truncate_height" value="3.0"/>
+      <param name="map_ros/visualization_truncate_low"    value="0.0"/>
+
+      <!-- map_ros visualization params -->
+      <param name="map_ros/input_cam_pose" value="false"/>
+      <!-- depth camera intrinsics (424x240, fovy=60deg) — suppress "Camera parameters not set" -->
+      <param name="map_ros/fx" value="207.8"/>
+      <param name="map_ros/fy" value="207.8"/>
+      <param name="map_ros/cx" value="212.0"/>
+      <param name="map_ros/cy" value="120.0"/>
+
+
+      <!-- Topic remappings -->
+      <remap from="~odom"               to="/odom"/>
+      <remap from="~goal"               to="/move_base_simple/goal"/>
+      <remap from="~uam_state_goal_cmd" to="/uam_state_goal_cmd"/>
+      <remap from="~triger"             to="/traj_start_trigger"/>
+      <remap from="~land_triger"        to="/land_triger"/>
+      <remap from="~joint_state_est"    to="/joint_states"/>
+      <!-- traj_server输出经此remap到_planner后缀，由bridge gate后按F键放行 -->
+      <remap from="~position_cmd"       to="/position_cmd_planner"/>
+    </node>
+
+  </group>
+
+  <!-- ================================================================ -->
+  <!-- 8. (Optional) GT Segmentation Pipeline                           -->
+  <!-- Enable with: use_gt_pipeline:=true                               -->
+  <!--                                                                  -->
+  <!-- 主线：MuJoCo GT Segmentation → split point cloud → planning     -->
+  <!-- 不需要 use_depth 或 use_planning（内置感知 + planning 节点）     -->
+  <!--                                                                  -->
+  <!-- 启动后流程：                                                      -->
+  <!--   takeoff → 场景中 cup 会被 GT mask 提取为 /gt_seg/tgt_pcl     -->
+  <!--   /sync_frame_pcl_world → planning → /position_cmd_planner      -->
+  <!-- ================================================================ -->
+  <group if="$(arg use_gt_pipeline)">
+    <include file="$(find mujoco_perception)/launch/gt_pipeline.launch">
+      <arg name="model_path" value="$(arg model_path)"/>
+      <arg name="show_camera_view" value="$(arg show_camera_view)"/>
+      <arg name="camera_view_topic" value="$(arg camera_view_topic)"/>
+    </include>
+  </group>
+
+  <!-- ================================================================ -->
+  <!-- 9. (Optional) YOLOE Pipeline                                     -->
+  <!-- Enable with: use_yoloe_pipeline:=true                            -->
+  <!--                                                                  -->
+  <!-- 对照线：MuJoCo RGB+Depth → YOLOE → split PCL → planning         -->
+  <!-- 包含：mujoco_rgb_depth_pub + yoloe_seg + bridge_node + planning  -->
+  <!--                                                                  -->
+  <!-- 首次运行会自动下载 yoloe-11l-seg.pt (~200MB)                    -->
+  <!-- 可在 yoloe_seg/cfg/config.yaml 中修改 model.text_prompts         -->
+  <!-- ================================================================ -->
+  <group if="$(arg use_yoloe_pipeline)">
+    <include file="$(find mujoco_perception)/launch/yoloe_pipeline.launch">
+      <arg name="model_path" value="$(arg model_path)"/>
+    </include>
+  </group>
+
+</launch>

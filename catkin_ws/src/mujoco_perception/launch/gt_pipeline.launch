@@ -1,0 +1,132 @@
+<launch>
+  <!--
+    gt_pipeline.launch
+    ==================
+    主线：MuJoCo GT Segmentation → point cloud → planner
+
+    该 launch 文件由 mujoco_sim.launch 通过 use_gt_pipeline:=true 调用。
+    前提：mujoco_ros_bridge, mavros_sim, px4ctrl 已由 mujoco_sim.launch 启动。
+
+    数据流：
+      mujoco_gt_seg_pub.py
+        → /gt_seg/tgt_pcl, /gt_seg/env_pcl (可视化)
+        → /sync_frame_pcl_world (SyncFrame: tgt+env) [直接发，无需 bridge_node]
+                ↓
+      planning node
+        → /position_cmd_planner
+  -->
+
+  <arg name="model_path" default="$(find drone_urdf)/scene_drone.xml"/>
+  <arg name="config_path"
+       default="$(find mujoco_perception)/cfg/config.yaml"/>
+  <arg name="use_task_manager" default="true"/>
+  <arg name="task_auto_start"  default="false"/>
+  <arg name="show_camera_view" default="false"/>
+  <arg name="camera_view_topic" default="/rgb_depth/image_rgb"/>
+
+  <!-- ================================================================ -->
+  <!-- 1. GT Segmentation Publisher                                      -->
+  <!-- ================================================================ -->
+  <node pkg="mujoco_perception" type="mujoco_gt_seg_pub.py"
+        name="mujoco_gt_seg_pub" output="screen" required="true">
+    <env name="MUJOCO_GL" value="egl"/>
+    <param name="model_path"   value="$(arg model_path)"/>
+    <param name="config_path"  value="$(arg config_path)"/>
+  </node>
+
+  <group if="$(arg show_camera_view)">
+    <node pkg="mujoco_perception" type="mujoco_rgb_depth_pub.py"
+          name="mujoco_rgb_depth_pub_debug" output="screen">
+      <env name="MUJOCO_GL" value="egl"/>
+      <param name="model_path"   value="$(arg model_path)"/>
+      <param name="config_path"  value="$(arg config_path)"/>
+    </node>
+    <node pkg="image_view" type="image_view" name="gt_camera_view" output="screen">
+      <remap from="image" to="$(arg camera_view_topic)"/>
+    </node>
+  </group>
+
+  <!-- ================================================================ -->
+  <!-- 2. Planning node (reused from Single-Drone-Planner)              -->
+  <!-- ================================================================ -->
+  <node pkg="planning" type="planning" name="planning" output="screen">
+    <param name="config_path" value="$(find planning)/config/config.yaml"/>
+    <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml"/>
+
+    <!-- SDF map -->
+    <param name="sdf_map/goal_method"         value="1"/>
+    <param name="sdf_map/ground_height"        value="-0.5"/>
+    <param name="sdf_map/obstacles_inflation"  value="0.20"/>
+    <param name="sdf_map/local_bound_inflate"  value="0.5"/>
+    <param name="sdf_map/local_map_margin"     value="50"/>
+    <param name="sdf_map/default_dist"         value="5.0"/>
+    <param name="sdf_map/p_hit"   value="0.65"/>
+    <param name="sdf_map/p_miss"  value="0.35"/>
+    <param name="sdf_map/p_min"   value="0.12"/>
+    <param name="sdf_map/p_max"   value="0.90"/>
+    <param name="sdf_map/p_occ"   value="0.80"/>
+    <param name="sdf_map/min_ray_length" value="0.2"/>
+    <param name="sdf_map/max_ray_length" value="5.0"/>
+    <param name="sdf_map/virtual_ceil_height" value="-10"/>
+    <param name="sdf_map/optimistic"  value="true"  type="bool"/>
+    <param name="sdf_map/signed_dist" value="true"  type="bool"/>
+
+    <!-- env_map -->
+    <param name="env_map/resolution"   value="0.05"/>
+    <param name="env_map/map_size_x"   value="10.0"/>
+    <param name="env_map/map_size_y"   value="10.0"/>
+    <param name="env_map/map_size_z"   value="3.0"/>
+    <param name="env_map/map_center_x" value="0.0"/>
+    <param name="env_map/map_center_y" value="0.0"/>
+    <param name="env_map/map_center_z" value="1.5"/>
+
+    <!-- tgt_map (target object local map) -->
+    <param name="tgt_map/resolution"   value="0.005"/>
+    <param name="tgt_map/map_size_x"   value="0.6"/>
+    <param name="tgt_map/map_size_y"   value="0.6"/>
+    <param name="tgt_map/map_size_z"   value="0.3"/>
+    <param name="tgt_map/map_center_x" value="0.0"/>
+    <param name="tgt_map/map_center_y" value="0.0"/>
+    <param name="tgt_map/map_center_z" value="0.5"/>
+
+    <!-- SyncFrame source -->
+    <param name="use_world_pcl"   value="true"/>
+    <param name="syncframe_topic" value="/sync_frame_pcl_world"/>
+
+    <!-- map_ros -->
+    <param name="map_ros/frame_id"          value="world"/>
+    <param name="map_ros/show_all_map"      value="true"/>
+    <param name="map_ros/show_occ_time"     value="false"/>
+    <param name="map_ros/show_esdf_time"    value="false"/>
+    <param name="map_ros/esdf_slice_height" value="1.0"/>
+    <param name="map_ros/visualization_truncate_height" value="3.0"/>
+    <param name="map_ros/visualization_truncate_low"    value="0.0"/>
+    <param name="map_ros/input_cam_pose"    value="false"/>
+    <param name="map_ros/fx" value="207.8"/>
+    <param name="map_ros/fy" value="207.8"/>
+    <param name="map_ros/cx" value="212.0"/>
+    <param name="map_ros/cy" value="120.0"/>
+
+    <!-- Topic remappings -->
+    <remap from="~odom"               to="/odom"/>
+    <remap from="~goal"               to="/move_base_simple/goal"/>
+    <remap from="~uam_state_goal_cmd" to="/uam_state_goal_cmd"/>
+    <remap from="~triger"             to="/traj_start_trigger"/>
+    <remap from="~land_triger"        to="/land_triger"/>
+    <remap from="~joint_state_est"    to="/joint_states"/>
+    <remap from="~position_cmd"       to="/position_cmd_planner"/>
+  </node>
+
+  <!-- ================================================================ -->
+  <!-- 3. Task Manager (occlusion detection + sequencing FSM)           -->
+  <!-- ================================================================ -->
+  <group if="$(arg use_task_manager)">
+    <!-- Set perception prefix before nodes start -->
+    <param name="/occlusion_analyzer/perception_prefix" value="gt_seg"/>
+    <include file="$(find task_manager)/launch/task_manager.launch">
+      <arg name="config_path" value="$(find task_manager)/cfg/config.yaml"/>
+      <arg name="auto_start"  value="$(arg task_auto_start)"/>
+    </include>
+  </group>
+
+</launch>

@@ -1,0 +1,9 @@
+# Common defaults for pcd_to_pcl nodes
+# These are loaded per-node via rosparam in the launch file.
+transform_enable: true
+transform_xyz: [0.0, 0.0, 0.0]
+transform_quat_xyzw: [0.0, 0.0, 0.0, 1.0]
+
+plot_pcd_enable: 0
+plot_pcd_max_points: 20000
+plot_pcd_block: 1

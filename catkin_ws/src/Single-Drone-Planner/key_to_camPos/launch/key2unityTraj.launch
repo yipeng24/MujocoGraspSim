@@ -1,0 +1,18 @@
+<launch>  
+   
+  <node pkg="key_to_camPos" name="key2joy_node_free" type="key_to_joy_free.py" output="screen">
+  </node>
+
+  <node pkg="key_to_camPos" type="joy2camPos" name="joy2unityTraj_free" output="screen">
+    <remap from="~unity_traj_cmd" to="/usable_command/trajectory"/>
+    <remap from="/joy" to="/joy_free"/>
+    <param name="pos_init_x" value="1.0"/>
+    <param name="pos_init_y" value="4.0"/>
+    <param name="pos_init_z" value="0.5"/> 
+    <param name="yaw_init" value="-1"/>
+  </node>
+
+ </launch>
+
+
+

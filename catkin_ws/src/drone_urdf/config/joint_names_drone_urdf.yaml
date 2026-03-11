@@ -1,0 +1,1 @@
+controller_joint_names: ['', 'arm_joint_pitch', 'arm_joint_pitch2', 'arm_joint_roll', 'arm_joint_right_finger', 'arm_link_left_finger', 'rotor_0_joint', 'rotor_1_joint', 'rotor_2_joint', 'rotor_3_joint', ]

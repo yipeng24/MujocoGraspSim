@@ -1,0 +1,53 @@
+<!-- ! 用不了，解决不了 conda 环境，改成 python 启动，从 config.yaml 中读取参数 -->
+
+<launch>
+  <!-- 输入 SyncFrame 话题 -->
+  <arg name="sync_frame_topic" default="/sync_frame_img"/>
+
+  <!-- 模型与推理 -->
+  <arg name="model_path" default="/home/jr/proj/airgrasp/planner_ws/src/Single-Drone-Planner/yolo_cup_seg/weights/best.pt"/>
+  <arg name="conf"  default="0.5"/>
+  <arg name="imgsz" default="640"/>
+  <arg name="device" default="auto"/>
+  <arg name="alpha"  default="0.5"/>
+
+  <!-- 深度与点云 -->
+  <arg name="depth_encoding" default="auto"/>
+  <arg name="depth_scale" default="0.001"/>
+  <arg name="depth_min" default="0.1"/>
+  <arg name="depth_max" default="6.0"/>
+  <arg name="point_stride" default="2"/>
+  <arg name="publish_empty_clouds" default="true"/>
+  <arg name="fg_class_ids" default="auto"/>
+
+  <!-- 固定相机内参（也可在命令行覆盖） -->
+  <arg name="K" default="[607.2257690429688, 0.0, 315.67559814453125, 0.0, 607.5105590820312, 233.73883056640625, 0.0, 0.0, 1.0]"/>
+
+  <node pkg="yolo11_cup_seg"
+        type="cup_segentation_pc.py"
+        name="cup_segentation_pc"
+        output="screen">
+
+    <env name="PATH"
+        value="/home/jr/anaconda3/envs/airgrasp/bin:$(env PATH)" />
+
+    <param name="sync_frame_topic" value="$(arg sync_frame_topic)"/>
+
+    <param name="model_path" value="$(arg model_path)"/>
+    <param name="conf" value="$(arg conf)"/>
+    <param name="imgsz" value="$(arg imgsz)"/>
+    <param name="device" value="$(arg device)"/>
+    <param name="alpha" value="$(arg alpha)"/>
+
+    <param name="depth_encoding" value="$(arg depth_encoding)"/>
+    <param name="depth_scale" value="$(arg depth_scale)"/>
+    <param name="depth_min" value="$(arg depth_min)"/>
+    <param name="depth_max" value="$(arg depth_max)"/>
+    <param name="point_stride" value="$(arg point_stride)"/>
+    <param name="publish_empty_clouds" value="$(arg publish_empty_clouds)"/>
+    <param name="fg_class_ids" value="$(arg fg_class_ids)"/>
+
+    <param name="K" value="$(arg K)"/>
+  </node>
+</launch>
+

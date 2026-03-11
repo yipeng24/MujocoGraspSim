@@ -1,0 +1,14 @@
+# Camera Intrinsic Parameters
+fx: 615.16552734375
+fy: 615.2965698242188
+cx: 334.2502136230469
+cy: 231.13877868652344
+
+# Transformation from End Effector to Camera (T_E_C)
+# 4x4 transformation matrix in row-major order
+T_E_C: [
+   0.0,  0.0,  1.0, -0.0405,
+  -1.0,  0.0,  0.0,  0.02833,
+   0.0, -1.0,  0.0,  0.03655,
+   0.0,  0.0,  0.0,  1.0
+]

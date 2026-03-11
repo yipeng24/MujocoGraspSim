@@ -1,0 +1,7 @@
+geometry_msgs/Point[] cams_p
+sensor_msgs/PointCloud2 pcl_front_unk
+float64 res_fov
+float64 res_grid
+int32 n_sample_pitch
+---
+sensor_msgs/Image cover_rate

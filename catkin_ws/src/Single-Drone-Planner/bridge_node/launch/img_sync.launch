@@ -1,0 +1,27 @@
+<launch>
+
+    <node pkg="bridge_node" name="bridge_node" type="bridge_node" output="screen">
+        <!-- servo_cmd -->
+        <param name="topic_arm_angles_cmd" value="/joint_state_cmd" />
+        <param name="topic_arm_grab_cmd"   value="/arm_grab_cmd" />
+        <param name="topic_grasp_cmd_out"  value="/grasp_chassis/grasp_pid_cmd" />
+        <param name="topic_operate_cmd"    value="/grasp_chassis/gripper_operate_cmd" />
+
+        <!-- sync_img -->
+        <param name="enable_img_sync" value="true" />
+        <param name="enable_pcl_sync" value="false" />
+        <param name="depth_topic"     value="/d435/aligned_depth_to_color/image_raw" />
+        <param name="rgb_topic"       value="/d435/color/image_raw" />
+        <param name="end_pose_topic"      value="/px4ctrl/end_pose_est" />
+        <param name="out_topic"       value="/sync_frame_img" />
+        <param name="slop"            value="1.0" />
+        <param name="queue_size"      value="100" />
+
+        <!-- visualization -->
+        <param name="en_vis"          value="true" />
+        
+        <!-- Load camera parameters and transformation matrix from config file -->
+        <rosparam command="load" file="$(find bridge_node)/config/config.yaml" />
+    </node>
+
+</launch>

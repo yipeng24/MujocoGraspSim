@@ -1,0 +1,29 @@
+ <launch>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mapping)/config/rviz_sim_bag.rviz">
+  </node>
+
+  <node pkg="odom_visualization" name="odom_visualization" type="odom_visualization" output="screen">
+        <!-- <remap from="~odom" to="/fusion_odom"/> -->
+		    <remap from="~odom" to="/drone0/odom" />
+        <!-- <remap from="~odom" to="/dual_chaser/wrapper/desired_odom"/> -->
+        <!-- <remap from="~odom" to="/visual_slam/odom"/> -->
+        <remap from="~tar_odom" to="/target/odom" />
+        
+        <param name="color/a" value="1.0"/>    
+        <param name="color/r" value="0.0"/>        
+        <param name="color/g" value="0.0"/>        
+        <param name="color/b" value="1.0"/>       
+        <param name="covariance_scale" value="100.0"/>       
+        <param name="robot_scale" value="4.0"/>
+        
+  </node>
+
+
+  <node pkg="odom_visualization" name="odom_visualization_car" type="odom_visualization_car" output="screen">
+    <remap from="~odom" to="/target/odom" />
+    <param name="mesh_resource" value="package://odom_visualization/meshes/car.dae"/>
+    <param name="robot_scale" value="0.1"/>
+  </node>
+
+</launch>

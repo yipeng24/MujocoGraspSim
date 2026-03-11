@@ -1,0 +1,15 @@
+<launch>
+
+  <arg name="rc_topic" value="/mavros/rc/in" />
+
+  <node pkg="joy" type="joy_node" name="joy_node">
+    <param name="dev"             value="/dev/input/js0"/>
+    <param name="autorepeat_rate" value="10"/>
+  </node>
+  
+  <node pkg="fake_rc" type="fake_rc_node" name="fake_rc_node" output="screen">
+    <param name="fake_rc/zero_tolerance"  value="0.05"/>
+    <remap from ="rcin" to="$(arg rc_topic)"/>
+  </node>
+
+</launch>

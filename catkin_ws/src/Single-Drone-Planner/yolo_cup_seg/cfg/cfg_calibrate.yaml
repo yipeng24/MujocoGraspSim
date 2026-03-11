@@ -1,0 +1,35 @@
+# 标定任务配置文件
+bag_path: "/home/jr/proj/airgrasp/planner_ws/bag/0113_realsense/2026-01-13-20-27-10.bag"
+
+# 话题配置
+topics:
+  image: "/d435/color/image_raw"
+  info: "/d435/aligned_depth_to_color/camera_info"
+  pose: "/vicon/hand_grasp/hand_grasp"
+
+# 相机内参
+camera:
+  K: [615.16552734375, 0.0, 334.2502136230469, 
+      0.0, 615.2965698242188, 231.13877868652344, 
+      0.0, 0.0, 1.0]
+  D: []  # 畸变系数 (如果需要请添加)
+
+# AprilGrid 标定板物理参数
+aprilgrid:
+  cols: 6               # 列数（横向 AprilTag 数量）
+  rows: 6               # 行数（纵向 AprilTag 数量）
+  tag_size: 0.055       # AprilTag 边长（米）
+  tag_spacing: 0.3      # 标签间距比例 (spacing/tag_size)，计算: 0.0165/0.055 = 0.3
+  
+# 手动挑选的稳定点时间戳 (单位: 秒)
+# 脚本会寻找最接近这些时间的 Image 和 Pose
+stamps:
+  - 1768307241.344508127
+  - 1768307248.710481524
+  - 1768307259.701441829
+  - 1768307267.966411980
+  - 1768307277.971375846
+  - 1768307289.861332904
+  - 1768307321.848217381
+  - 1768307327.329197586
+  - 1768307352.936105104

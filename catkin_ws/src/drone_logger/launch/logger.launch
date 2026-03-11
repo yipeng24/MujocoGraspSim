@@ -1,0 +1,92 @@
+<launch>
+  <!--
+    logger.launch
+    =============
+    启动飞机全状态录制 pipeline：
+      1. 固定全景相机图像发布（overview_cam → /fixed_cam/image_raw）
+      2. rosbag 录制（全状态 + 相机 + 控制信号）
+
+    典型用法：
+      # 与主仿真一起启动（use_payload 场景下）：
+      roslaunch drone_logger logger.launch \
+        model_path:=$(rospack find drone_urdf)/scene_drone_payload.xml \
+        bag_prefix:=/tmp/drone_flight
+
+      # 只启动 rosbag（相机节点已在别处启动）：
+      roslaunch drone_logger logger.launch \
+        start_fixed_cam:=false \
+        bag_prefix:=/tmp/drone_flight
+
+    参数说明：
+      model_path       : MuJoCo XML 路径（用于固定相机节点）
+      camera_name      : 渲染相机名，默认 overview_cam
+      cam_width        : 渲染宽度（默认 640）
+      cam_height       : 渲染高度（默认 480）
+      cam_fps          : 发布帧率（默认 10.0）
+      start_fixed_cam  : true=启动固定相机节点；false=仅录制（默认 true）
+      bag_prefix       : rosbag 输出路径前缀（默认 /tmp/drone_log）
+      record_bag       : true=启动 rosbag record（默认 true）
+  -->
+
+  <arg name="model_path"      default="$(find drone_urdf)/scene_drone_payload.xml"/>
+  <arg name="camera_name"     default="overview_cam"/>
+  <arg name="cam_width"       default="640"/>
+  <arg name="cam_height"      default="480"/>
+  <arg name="cam_fps"         default="10.0"/>
+  <arg name="start_fixed_cam" default="true"/>
+  <arg name="record_bag"      default="true"/>
+  <arg name="bag_prefix"      default="/tmp/drone_log"/>
+
+  <!-- ================================================================ -->
+  <!-- 1. 固定全景相机图像发布节点                                       -->
+  <!-- 订阅: /odom, /joint_states                                       -->
+  <!-- 发布: /fixed_cam/image_raw, /fixed_cam/camera_info              -->
+  <!-- ================================================================ -->
+  <group if="$(arg start_fixed_cam)">
+    <node pkg="mujoco_bridge" type="fixed_cam_pub.py"
+          name="fixed_cam_pub" output="screen">
+      <param name="model_path"    value="$(arg model_path)"/>
+      <param name="camera_name"   value="$(arg camera_name)"/>
+      <param name="width"         value="$(arg cam_width)"/>
+      <param name="height"        value="$(arg cam_height)"/>
+      <param name="fps"           value="$(arg cam_fps)"/>
+      <param name="topic_prefix"  value="/fixed_cam"/>
+    </node>
+  </group>
+
+  <!-- ================================================================ -->
+  <!-- 2. rosbag 录制                                                    -->
+  <!--                                                                   -->
+  <!-- 录制话题清单：                                                    -->
+  <!--   /drone/full_state       飞机全状态（DroneFullState）           -->
+  <!--   /fixed_cam/image_raw    固定相机画面                           -->
+  <!--   /fixed_cam/camera_info  相机内参                               -->
+  <!--   /odom                   里程计（位置+速度+姿态）               -->
+  <!--   /visual_odom            视觉里程计（与 /odom 相同）            -->
+  <!--   /attitude_cmd           Px4Ctrl 输出指令                       -->
+  <!--   /joint_states           机械臂关节状态                         -->
+  <!--   /px4ctrl/debug          Px4Ctrl 详细调试信息                   -->
+  <!--   /mavros/imu/data        IMU 角速度 + 线加速度                  -->
+  <!--   /position_cmd           位置指令（来自键盘或规划器）           -->
+  <!--                                                                   -->
+  <!-- 输出文件：<bag_prefix>_YYYY-MM-DD-HH-MM-SS.bag                  -->
+  <!-- ================================================================ -->
+  <group if="$(arg record_bag)">
+    <node pkg="rosbag" type="record" name="rosbag_record"
+          output="screen"
+          args="-o $(arg bag_prefix)
+                /drone/full_state
+                /fixed_cam/image_raw
+                /fixed_cam/camera_info
+                /odom
+                /visual_odom
+                /attitude_cmd
+                /joint_states
+                /px4ctrl/debug
+                /mavros/imu/data
+                /position_cmd
+                /arm_grab_cmd
+                /joint_state_cmd"/>
+  </group>
+
+</launch>

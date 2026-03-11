@@ -1,0 +1,29 @@
+<launch>
+  <arg name="serial_no_camera"       default="831612070516"/>    <!-- D435 -->
+  <arg name="camera"                 default="d435"/>
+  <arg name="tf_prefix_camera"       default="$(arg camera)"/>
+  <arg name="initial_reset"           default="false"/>
+  <arg name="reconnect_timeout"       default="6.0"/>
+  <arg name="align_depth"         default="true"/>
+
+  <!-- D435: depth + color -->
+  <group ns="$(arg camera)">
+    <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
+      <arg name="serial_no"             value="$(arg serial_no_camera)"/>
+      <arg name="tf_prefix"             value="$(arg tf_prefix_camera)"/>
+      <arg name="initial_reset"         value="$(arg initial_reset)"/>
+      <arg name="reconnect_timeout"     value="$(arg reconnect_timeout)"/>
+      <arg name="align_depth"              value="$(arg align_depth)"/>
+
+      <arg name="enable_color"          value="true"/>
+      <arg name="enable_depth"          value="true"/>
+      <arg name="enable_infra1"         value="false"/>
+      <arg name="enable_infra2"         value="false"/>
+
+      <arg name="enable_pointcloud"     value="false"/>
+      <arg name="enable_gyro"           value="false"/>
+      <arg name="enable_accel"          value="false"/>
+      <arg name="enable_sync"           value="true"/>
+    </include>
+  </group>
+</launch>

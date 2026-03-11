@@ -1,0 +1,37 @@
+services:
+  mujoco_ros1_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ros1-noetic-mujoco:fixed
+    container_name: mujoco_ros1_dev
+
+    network_mode: host
+    ipc: host
+
+    tty: true
+    stdin_open: true
+
+    gpus: all
+
+    volumes:
+      - /home/lambyeeh/program/mujoco_ros1_docker:/workspace
+      - /home/lambyeeh/program/mujoco_ros1_docker/third_party/mujoco:/opt/mujoco:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+
+    devices:
+      - /dev/dri:/dev/dri
+
+    environment:
+      DISPLAY: ${DISPLAY}
+      MUJOCO_DIR: /opt/mujoco
+
+      MUJOCO_GL: egl
+      __EGL_VENDOR_LIBRARY_FILENAMES: /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility,graphics,display"
+
+      XDG_RUNTIME_DIR: /tmp/xdg_runtime
+
+      LD_LIBRARY_PATH: /opt/mujoco/lib:${LD_LIBRARY_PATH}

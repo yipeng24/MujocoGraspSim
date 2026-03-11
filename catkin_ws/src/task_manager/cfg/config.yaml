@@ -1,0 +1,38 @@
+# ── 输入话题 ──────────────────────────────────────────────────────────────
+# 选择感知管线：gt 或 yoloe
+perception_prefix: "gt_seg"    # "gt_seg" | "yoloe_seg"
+
+# ── 遮挡分析参数 ──────────────────────────────────────────────────────────
+occlusion:
+  voxel_size:       0.03    # 体素化分辨率（米）
+  approach_radius:  0.15    # 目标上方接近通道半径（米）
+  approach_height:  0.35    # 目标上方接近通道高度（米）
+  min_cluster_pts:  5       # 小于此点数的障碍物聚类忽略
+  publish_hz:       5.0     # 遮挡状态发布频率
+
+# ── 任务状态机参数 ────────────────────────────────────────────────────────
+fsm:
+  hover_height:         0.5    # 在物体正上方悬停高度（相对于物体质心，米）
+  place_dist:           0.6    # 将障碍物放置点距目标的距离（米）
+  place_z_offset:       0.0    # 放置点 Z 偏移（相对于障碍物原来高度，米）
+  nav_xy_tol:           0.08   # 到达目标的 XY 容差（米）
+  nav_z_tol:            0.06   # Z 容差（米）
+  grasp_descend_dist:   0.25   # 抓取下降距离（米）
+  carry_height:         0.8    # 携带高度（米，世界系 Z）
+  goal_timeout:         15.0   # 单步导航超时（秒）
+  rescan_after_place:   true   # 放置后重新扫描遮挡
+  # 机械臂关节角配置（弧度）
+  # arm_pitch_joint 轴 Y：0=臂朝前，π/2≈1.5708 = 臂朝正下
+  # arm_pitch2_joint 轴 Y：0=肘关节伸直，随 pitch1 方向
+  # arm_roll_joint 轴 X：0=腕部中立
+  nav_arm_theta:   [0.0,    0.0, 0.0]   # 飞行中臂收起，避免碰撞
+  grasp_arm_theta: [1.5708, 0.0, 0.0]   # 臂竖直朝下，准备抓取
+
+# ── 输出话题 ──────────────────────────────────────────────────────────────
+output:
+  occlusion_state_topic:  "/task/occlusion_state"     # std_msgs/String
+  target_pose_topic:      "/task/target_pose"         # geometry_msgs/PoseStamped
+  obstacle_poses_topic:   "/task/obstacle_poses"      # geometry_msgs/PoseArray
+  remove_poses_topic:     "/task/obstacle_remove_poses" # geometry_msgs/PoseArray
+  goal_topic:             "/uam_state_goal_cmd"        # quadrotor_msgs/UAMFullState
+  arm_cmd_topic:          "/arm_grab_cmd"             # std_msgs/String

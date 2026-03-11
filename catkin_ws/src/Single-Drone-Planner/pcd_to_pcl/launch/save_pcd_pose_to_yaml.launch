@@ -1,0 +1,21 @@
+<launch>
+  <arg name="env_pose_topic" default="/vicon/hand_cube/hand_cube"/>
+  <arg name="tgt_pose_topic" default="/vicon/hand_cup/hand_cup"/>
+
+  <node pkg="pcd_to_pcl" name="pcd_pose_to_yaml" type="save_pcd_pose_to_yaml.py" output="screen">
+    <param name="env_pose_topic" value="$(arg env_pose_topic)"/>
+    <param name="tgt_pose_topic" value="$(arg tgt_pose_topic)"/>
+
+    <!-- outputs -->
+    <param name="env_config_path" value="$(find pcd_to_pcl)/config/config_env.yaml"/>
+    <param name="tgt_config_path" value="$(find pcd_to_pcl)/config/config_tgt.yaml"/>
+    <param name="env_vicon_config_path" value="$(find pcd_to_pcl)/config/config_env_vicon.yaml"/>
+    <param name="tgt_vicon_config_path" value="$(find pcd_to_pcl)/config/config_tgt_vicon.yaml"/>
+
+    <!-- inputs: obj->vicon -->
+    <param name="env_obj_to_vicon_config_path" value="$(find pcd_to_pcl)/config/env_obj_to_vicon.yaml"/>
+    <param name="tgt_obj_to_vicon_config_path" value="$(find pcd_to_pcl)/config/tgt_obj_to_vicon.yaml"/>
+
+    <param name="set_transform_enable" value="true"/>
+  </node>
+</launch>

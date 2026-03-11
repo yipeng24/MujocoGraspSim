@@ -1,0 +1,10 @@
+float64 cost_snap
+float64 cost_v
+float64 cost_a
+float64 cost_omega
+float64 cost_t
+float64 cost_collision
+float64 cost_yaw
+float64 cost_dyaw
+float64 cost_wp
+float64[] cost_dthetas

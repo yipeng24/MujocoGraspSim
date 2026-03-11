@@ -1,0 +1,28 @@
+<launch>
+
+    <node pkg="bridge_node" name="bridge_node" type="bridge_node" output="screen">
+        <!-- servo_cmd -->
+        <!-- <param name="enable_arm_bridge" value="true" />
+        <param name="topic_arm_angles_cmd" value="/joint_state_cmd" />
+        <param name="topic_arm_grab_cmd"   value="/arm_grab_cmd" />
+        <param name="topic_grasp_cmd_out"  value="/grasp_chassis/grasp_pid_cmd" />
+        <param name="topic_lz_motor_est"   value="/grasp_chassis/lz_motor_feedback" />
+        <param name="topic_ft_servo_est"   value="/grasp_chassis/ft_servo_feedback" />
+        <param name="topic_joint_state_est" value="/joint_state_est_sim" />
+        <param name="stuck_duration_threshold" value="0.5" />
+        <param name="protect_angle_offset" value="0.0" /> -->
+
+        <!-- sync_pcl (World Frame Mode) -->
+        <param name="enable_pcl_sync" value="true" />
+        <param name="use_world_frame_pcl" value="true" />
+        
+        <param name="tgt_topic"       value="/pcl_from_pcd/tgt_pcl"/>
+        <param name="env_topic"       value="/pcl_from_pcd/env_pcl"/>
+        <!-- odom_topic not needed in world frame mode -->
+        <param name="out_topic"       value="/sync_frame_pcl_world"/>
+        <param name="queue_size"      value="20"/>
+        <param name="slop"            value="0.2"/> 
+
+    </node>
+
+</launch>

@@ -1,0 +1,21 @@
+# Basic Params
+TriggerTopic:               '/move_base_simple/goal'
+# OdomTopic:                  '/vicon_imu_ekf_odom'
+OdomTopic:                  '/drone0/odom'
+TrajectoryTopic:            '/traj_server/trajectory'
+OdomFrame:                  'world'
+BoxMin:                     [-2.0, -2.0, 0.8]
+BoxMax:                     [ 2.7,  2.0, 1.8]
+Round:                      3
+
+# Advanced Params
+DiagWidth:                  0.5
+SideWidth:                  0.5
+
+MaxAccRate:                  1.00
+MaxVelRate:                  0.80
+WeightT:                     128.0
+
+ChiVec:                      [65536.0, 1024.0, 1024.0]
+RelCostTol:                  1.0e-4
+C2Diffeo:                    True

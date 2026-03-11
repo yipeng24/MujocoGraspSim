@@ -1,0 +1,32 @@
+fake_mod_node:
+  simulator:
+    gravity: 9.81
+    mass: 0.712
+    kf: 1.41e-08
+    zmoment_thrust_coeff: 0.015
+    p1: -0.004775
+    p2: 26.6
+    p3: 871.3
+    arm_length: 0.125
+    Ip: 1.414389e-8
+    max_rpm: 27000.0
+    min_rpm: 0.0
+    init_x: -2.0
+    init_y: 0.0
+    init_z: 3.0
+    init_yaw: 0.0
+    ctrl_delay: 0.0
+    rotor_time_constant: 0.03333
+    time_resolution: 0.002
+    inertia: [0.002655424, 0.0        , 0.0 ,
+              0.0        , 0.002884483, 0.0 ,
+              0.0        , 0.0        , 0.004338972]
+    rotor_drag_dx: 0.26
+    rotor_drag_dy: 0.28
+    rotor_drag_dz: 0.42
+    rotor_drag_kh: 0.0
+    noise_pos: 0.0
+    noise_vel: 0.0
+    noise_acc: 0.0
+    noise_rpm: 0.0
+    ext_tau: 0.0

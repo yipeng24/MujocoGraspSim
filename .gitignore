@@ -1,0 +1,20 @@
+# Conda & Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# MuJoCo & ROS
+build/
+devel/
+logs/
+*.so
+*.o
+*.bin
+
+# Docker & IDE
+.docker/
+.vscode/
+.idea/
+.DS_Store

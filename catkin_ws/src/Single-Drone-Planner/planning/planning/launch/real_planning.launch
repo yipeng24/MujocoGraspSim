@@ -1,0 +1,91 @@
+<launch>
+
+  <group ns="drone0">
+    <node pkg="odom_visualization" name="odom_visualization" type="odom_visualization" output="screen">
+      <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml" />
+      <remap from="~odom" to="/drone0/odom" />
+      <param name="robot_scale" value="1.0"/>
+    </node>
+    
+    <node pkg="planning" name="planning" type="planning" output="screen">
+
+      <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml" />
+
+      <remap from="~odom" to="/drone0/odom"/>
+      <remap from="~goal" to="/move_base_simple/goal"/>
+      <remap from="~uam_state_goal_vis" to="~uam_state_goal_vis"/>
+      <remap from="~uam_state_goal_cmd" to="~uam_state_goal_cmd"/>
+      <remap from="~joint_state_est" to="/joint_state_est"/>
+      <remap from="~stick_ring_pose" to="/stick_ring_pose"/>
+
+      <param name ="use_world_pcl" value="true"/>
+      <param name ="syncframe_topic" value="/sync_frame_pcl_world"/>
+
+      <!-- <param name ="syncframe_topic" value="/sync_frame_pcl"/> -->
+
+      <param name="sdf_map/ground_height"        value="-1.0"/>
+
+      <param name="tgt_map/resolution"   value="0.005" /> 
+      <param name="tgt_map/map_size_x"   value="0.6" /> 
+      <param name="tgt_map/map_size_y"   value="0.6" />
+      <param name="tgt_map/map_size_z"   value="0.2" /> 
+      <param name="tgt_map/map_center_x" value="0.0" /> 
+      <param name="tgt_map/map_center_y" value="0.0" />
+      <param name="tgt_map/map_center_z" value="0.7" /> 
+
+      <param name="env_map/resolution"   value="0.05" /> 
+      <param name="env_map/map_size_x"   value="5.0" /> 
+      <param name="env_map/map_size_y"   value="5.0" />
+      <param name="env_map/map_size_z"   value="3.0" /> 
+      <param name="env_map/map_center_x" value="0.0" /> 
+      <param name="env_map/map_center_y" value="0.0" />
+      <param name="env_map/map_center_z" value="1.0" /> 
+
+      <param name="sdf_map/obstacles_inflation"     value="0.099" /> 
+      <param name="sdf_map/local_bound_inflate"    value="0.5"/>
+      <param name="sdf_map/local_map_margin" value="50"/>
+      <param name="sdf_map/default_dist"        value="5.0"/>
+      
+      <param name="sdf_map/p_hit"  value="0.65"/>
+      <param name="sdf_map/p_miss" value="0.35"/>
+      <param name="sdf_map/p_min"  value="0.12"/>
+      <param name="sdf_map/p_max"  value="0.90"/>
+      <param name="sdf_map/p_occ"  value="0.80"/>
+      <param name="sdf_map/min_ray_length" value="0.2"/>
+      <!-- 需要比depth_filter_maxdist长一点 -->
+      <param name="sdf_map/max_ray_length" value="3.0"/>
+      <param name="sdf_map/virtual_ceil_height"   value="-10"/>
+      <param name="sdf_map/optimistic" value="true" type="bool"/>
+      <param name="sdf_map/signed_dist" value="true" type="bool"/>
+
+      <param name="map_ros/fx" value="240"/>
+      <param name="map_ros/fy" value="240"/>
+      <param name="map_ros/cx" value="320"/>
+      <param name="map_ros/cy" value="240"/>
+
+      <param name="map_ros/depth_filter_maxdist"   value="3.0"/>
+      <param name="map_ros/depth_filter_mindist"   value="0.2"/>
+      <param name="map_ros/depth_filter_margin"    value="2"/>
+      <param name="map_ros/k_depth_scaling_factor" value="1.0"/>
+      <param name="map_ros/skip_pixel" value="2"/>
+      <param name="map_ros/esdf_slice_height" value="0.7"/>
+      <param name="map_ros/visualization_truncate_height"   value="3.0"/>
+      <param name="map_ros/visualization_truncate_low"   value="-0.1"/>
+      <param name="map_ros/show_occ_time"  value="false"/>
+      <param name="map_ros/show_esdf_time" value="false"/>
+      <param name="map_ros/show_all_map" value="true"/>
+      <param name="map_ros/frame_id"      value="world"/>
+
+      <param name="map_ros/input_cam_pose" value="false"/>
+
+    </node>
+
+    <!-- <include file="$(find planning)/launch/planning.launch">
+      <arg name="rhosVisibility_" value="1000.0"/>
+      <arg name="rhoTracking_" value="1000.0"/>
+      <arg name="target_name_" value="/target_ekf_odom"/>
+    </include> -->
+
+  </group>
+</launch>
+

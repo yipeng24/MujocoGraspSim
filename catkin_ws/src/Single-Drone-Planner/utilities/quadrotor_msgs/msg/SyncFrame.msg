@@ -1,0 +1,10 @@
+# SyncFrame.msg
+std_msgs/Header header
+sensor_msgs/Image  depth
+sensor_msgs/Image  rgb
+sensor_msgs/Image  mask
+sensor_msgs/PointCloud2  tgt_pcl
+sensor_msgs/PointCloud2  env_pcl
+nav_msgs/Odometry  cam_pose
+nav_msgs/Odometry  body_odom
+sensor_msgs/CameraInfo cam_info

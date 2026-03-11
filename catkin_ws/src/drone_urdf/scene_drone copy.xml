@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mujoco model="drone_scene">
+
+  <include file="drone_converted.xml"/>
+
+  <compiler angle="radian" meshdir="meshes" texturedir="."/>
+  <option timestep="0.002" integrator="RK4"/>
+
+  <default>
+    <joint damping="2" armature="0.02" frictionloss="0.02"/>
+    <geom solref="0.02 1" solimp="0.9 0.95 0.002" condim="3" friction="1 0.01 0.001"/>
+  </default>
+
+  <asset>
+    <texture name="sky" type="skybox" builtin="flat"
+             rgb1="0.96 0.96 0.96" rgb2="0.90 0.90 0.90"
+             width="256" height="256"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 2" dir="0 0 -1" diffuse="1 1 1" specular="0.2 0.2 0.2"/>
+    <camera name="maincam" pos="0.7 0.7 0.45" quat="0.9239 0 0 0.3827"/>
+    <geom name="floor" type="plane" pos="0 0 -0.3" size="2 2 0.1"
+          rgba="0.92 0.92 0.92 1" contype="1" conaffinity="1"/>
+  </worldbody>
+
+</mujoco>
+

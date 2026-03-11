@@ -1,0 +1,35 @@
+<launch>
+
+  <arg name="cmd_topic" value="/mavros/setpoint_raw/attitude" />
+  <arg name="odom_topic" value="odom" />
+  <arg name="imu_topic" value="/mavros/imu/data" />
+  <arg name="mesh_topic" value="/mod/mesh" />
+  <arg name="state_topic" value="/mavros/state" />
+  <arg name="set_mode_server" value="/mavros/set_mode" />
+
+	<arg name="rpm_topic" value="/mavros/esc_telemetry" />
+	<arg name="rc_topic" value="/mavros/rc/in" />
+	<arg name="use_sim" default="true" />
+	<arg name="use_joy" default="false" />
+
+  <group ns="drone0">
+    <rosparam command="load" file="$(find fake_mod)/params/simulator.yaml" />
+
+    <node pkg="fake_mod" type="fake_mod_node" name="fake_mod_node" output="screen" required="true">
+      <remap from ="~odom" to="$(arg odom_topic)"/>
+      <remap from ="~imu" to="$(arg imu_topic)"/>
+      <remap from ="~cmd" to="$(arg cmd_topic)"/>
+      <remap from ="~mesh" to="$(arg mesh_topic)"/>
+      <remap from ="~state" to="$(arg state_topic)"/>
+      <remap from ="~rpm" to="$(arg rpm_topic)"/>
+      <remap from ="~set_mode" to="$(arg set_mode_server)"/>
+    </node>
+
+    <node pkg="fake_rc" type="fake_rc_node" name="fake_rc_node" output="screen">
+      <param name="fake_rc/zero_tolerance"  value="0.05"/>
+      <param name="fake_rc/use_joy"  value="$(arg use_joy)"/>
+      <param name="fake_rc/use_sim"  value="$(arg use_sim)"/>
+      <remap from ="rcin" to="$(arg rc_topic)"/>
+    </node>
+  </group>
+</launch>

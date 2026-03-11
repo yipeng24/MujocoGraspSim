@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  scene_drone_payload.xml
+  =======================
+  带 payload 的仿真场景（可替换 scene_drone.xml 使用）。
+
+  与 scene_drone.xml 的差异：
+    1. worldbody 中新增 <body name="payload"> 自由体（可移动）
+    2. <equality> 中新增 <weld> 把 payload 刚性连接到 gripper_frame (arm_roll_link +7cm)
+    3. worldbody 中新增 overview_cam 固定相机（用于 rosbag 录制）
+
+  使用方式：
+    roslaunch mujoco_bridge mujoco_sim.launch use_payload:=true [其它参数]
+
+  去除 payload：直接使用 use_payload:=false（默认），则加载原始 scene_drone.xml。
+
+  运行时动态修改 payload 质量/质心：
+    rosservice call /drone/set_payload "{mass: 0.2, com_x: 0.0, com_y: 0.0, com_z: 0.0, enable: true}"
+-->
+<mujoco model="drone_scene_payload">
+
+  <!-- 无缝复用 drone_converted.xml（包含 gripper_frame site） -->
+  <include file="drone_converted.xml"/>
+
+  <compiler angle="radian" meshdir="meshes" texturedir="."/>
+  <option timestep="0.002" integrator="RK4"/>
+
+  <default>
+    <joint damping="2" armature="0.02" frictionloss="0.02"/>
+    <geom solref="0.02 1" solimp="0.9 0.95 0.002" condim="3" friction="1 0.01 0.001"/>
+  </default>
+
+  <asset>
+    <texture name="sky" type="skybox" builtin="flat"
+             rgb1="0.96 0.96 0.96" rgb2="0.90 0.90 0.90"
+             width="256" height="256"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 2" dir="0 0 -1" diffuse="1 1 1" specular="0.2 0.2 0.2"/>
+
+    <!-- 原始俯视相机（MuJoCo viewer 默认视角） -->
+    <camera name="maincam" pos="0.7 0.7 0.45" quat="0.9239 0 0 0.3827"/>
+
+    <!-- 固定全景相机：用于 rosbag 录制，可看到完整抓取过程 -->
+    <!-- 位置: (2.5, 0, 2.5)，俯角约 45°，朝向场景中心 -->
+    <!-- xyaxes: X轴(右)=(0,1,0), Y轴(上)=(-0.707,0,0.707) => 看向(-1,0,-1)方向 -->
+    <camera name="overview_cam"
+            pos="2.5 0.0 2.5"
+            xyaxes="0 1 0  -0.707 0 0.707"
+            fovy="70"/>
+
+    <geom name="floor" type="plane" pos="0 0 -0.3" size="2 2 0.1"
+          rgba="0.92 0.92 0.92 1" contype="1" conaffinity="1"/>
+
+    <!-- 柱子 -->
+    <geom name="pillar" type="cylinder"
+          pos="1.2 0.8 0.55" size="0.12 0.85"
+          rgba="0.60 0.62 0.68 1" contype="1" conaffinity="1"/>
+
+    <!-- 桌子 -->
+    <geom name="table_top" type="box"
+          pos="-0.8 -0.6 0.45" size="0.40 0.30 0.025"
+          rgba="0.72 0.52 0.30 1" contype="1" conaffinity="1"/>
+    <geom name="table_leg_fl" type="box"
+          pos="-0.43 -0.33 0.063" size="0.025 0.025 0.363"
+          rgba="0.72 0.52 0.30 1" contype="1" conaffinity="1"/>
+    <geom name="table_leg_fr" type="box"
+          pos="-0.43 -0.87 0.063" size="0.025 0.025 0.363"
+          rgba="0.72 0.52 0.30 1" contype="1" conaffinity="1"/>
+    <geom name="table_leg_bl" type="box"
+          pos="-1.17 -0.33 0.063" size="0.025 0.025 0.363"
+          rgba="0.72 0.52 0.30 1" contype="1" conaffinity="1"/>
+    <geom name="table_leg_br" type="box"
+          pos="-1.17 -0.87 0.063" size="0.025 0.025 0.363"
+          rgba="0.72 0.52 0.30 1" contype="1" conaffinity="1"/>
+
+    <!-- 目标抓取物体：杯子 -->
+    <body name="cup" pos="-0.8 -0.6 0.535">
+      <freejoint name="cup_freejoint"/>
+      <geom name="cup_geom" type="cylinder"
+            size="0.035 0.06"
+            rgba="0.85 0.15 0.10 1"
+            mass="0.15"
+            contype="1" conaffinity="1"/>
+    </body>
+
+    <!-- 障碍物：蓝色方块 -->
+    <body name="obstacle_box" pos="-0.72 -0.52 0.515">
+      <freejoint name="obstacle_box_freejoint"/>
+      <geom name="obstacle_box_geom" type="box"
+            size="0.04 0.04 0.04"
+            rgba="0.15 0.40 0.85 1"
+            mass="0.12"
+            contype="1" conaffinity="1"/>
+    </body>
+
+    <!--
+      ======================================================
+      PAYLOAD BODY
+      ======================================================
+      通过 weld equality 刚性连接到 arm_roll_link 的 gripper_frame 处。
+      初始位置任意（weld 约束会在第一次 mj_forward 后将其拉到正确位置）。
+
+      运行时修改属性：rosservice call /drone/set_payload ...
+      初始默认质量: 0.1 kg，质心: gripper_frame 原点处
+    -->
+    <body name="payload" pos="0 0 0">
+      <freejoint name="payload_freejoint"/>
+      <inertial pos="0 0 0" mass="0.1"
+                diaginertia="4.17e-05 4.17e-05 4.17e-05"/>
+      <!-- 橙色半透明方块，边长 5cm，便于视觉识别 -->
+      <geom name="payload_geom" type="box"
+            size="0.025 0.025 0.025"
+            rgba="1.0 0.55 0.0 0.85"
+            contype="0" conaffinity="0"/>
+            <!-- contype/conaffinity=0: payload 不参与碰撞，避免干扰抓取 -->
+    </body>
+
+  </worldbody>
+
+  <equality>
+    <!-- 两指镜像耦合（与 scene_drone.xml 相同） -->
+    <joint joint1="arm_right_finger_joint" joint2="arm_left_finger_joint" polycoef="0 -1 0 0 0"/>
+
+    <!--
+      PAYLOAD WELD
+      将 payload body 刚性固定到 arm_roll_link 的 gripper_frame 位置。
+      relpose: "x y z  qw qx qy qz" — payload 在 arm_roll_link 坐标系中的相对位置
+               pos=(0.07, 0, 0) 对应 gripper_frame site 位置
+    -->
+    <weld name="payload_weld"
+          body1="payload" body2="arm_roll_link"
+          relpose="0.07 0 0  1 0 0 0"/>
+  </equality>
+
+  <actuator>
+    <!-- 4 旋翼 -->
+    <motor name="rotor0_motor" joint="rotor0_joint" gear="1" ctrllimited="true" ctrlrange="0 50"/>
+    <motor name="rotor1_motor" joint="rotor1_joint" gear="1" ctrllimited="true" ctrlrange="0 50"/>
+    <motor name="rotor2_motor" joint="rotor2_joint" gear="1" ctrllimited="true" ctrlrange="0 50"/>
+    <motor name="rotor3_motor" joint="rotor3_joint" gear="1" ctrllimited="true" ctrlrange="0 50"/>
+
+    <!-- 机械臂 3 关节 -->
+    <position name="arm_pitch_servo"  joint="arm_pitch_joint"  kp="50" ctrlrange="0 1.5708"/>
+    <position name="arm_pitch2_servo" joint="arm_pitch2_joint" kp="50" ctrlrange="-1.5708 1.5708"/>
+    <position name="arm_roll_servo"   joint="arm_roll_joint"   kp="50" ctrlrange="-1.5708 1.5708"/>
+
+    <!-- 夹爪 -->
+    <position name="gripper_servo" joint="arm_right_finger_joint" kp="20" ctrlrange="-0.025 0.025"/>
+  </actuator>
+
+</mujoco>

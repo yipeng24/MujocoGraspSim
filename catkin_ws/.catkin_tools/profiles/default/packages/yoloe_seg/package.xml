@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>yoloe_seg</name>
+  <version>0.1.0</version>
+  <description>YOLOE-based instance segmentation node: SyncFrame(rgb+depth) → split point cloud → SyncFrame(tgt+env)</description>
+  <maintainer email="lab@lab.com">lab</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>quadrotor_msgs</depend>
+</package>

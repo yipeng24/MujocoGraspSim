@@ -1,0 +1,6 @@
+nav_msgs/Odemetry cam_pose
+int8 width
+int8 height
+float64 fx
+---
+float64 time_elapsed

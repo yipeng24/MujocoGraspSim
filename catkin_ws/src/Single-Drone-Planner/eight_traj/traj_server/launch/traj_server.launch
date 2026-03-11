@@ -1,0 +1,13 @@
+<launch>
+    <node pkg="traj_server" type="traj_server_node" name="traj_server" output="screen" launch-prefix="">
+        <remap from="~/joy" to="/nouse"/>
+        <remap from="~/position_command" to="/position_cmd"/>
+        <remap from="~/odometry" to="/drone0/odom"/>
+        <remap from="~/trajectory" to="/traj_server/trajectory"/>
+        <remap from="~/joint_state_est" to="/joint_state_est"/>
+        <param name="en_js_sweep" value="true"/>
+        <param name="sweep_freq_0" value="0.08"/>
+        <param name="sweep_freq_1" value="0.08"/>
+        <param name="sweep_freq_2" value="0.08"/>
+	</node>
+</launch>

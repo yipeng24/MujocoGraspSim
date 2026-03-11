@@ -1,0 +1,134 @@
+<launch>
+
+<!-- Patrick -->
+  <arg name="init_x_" default="-0.5"/>
+  <arg name="init_y_" default="0.0"/>
+  <arg name="init_z_" default="0.7"/>
+
+  <node pkg="key_to_camPos" name="key2joy_node_free" type="key_to_joy_UAM.py" output="screen">
+  </node>
+
+  <node pkg="key_to_camPos" type="joy2camPos" name="joy2camPos_free" output="screen">
+    <remap from="/joy2camPos_free/odom" to="/free_cam_pos"/>
+    <remap from="/joy" to="/joy_free"/>
+
+    <remap from="~uam_state_cmd" to="/drone0/uam_state_cmd"/>
+    <remap from="~uam_state_goal" to="/drone0/uam_state_goal"/>
+  </node>
+
+  <group ns="drone0">
+
+    <node pkg="poscmd_2_odom" name="drone_poscmd_2_odom" type="poscmd_2_odom" output="screen">
+          <param name="init_x" value="$(arg init_x_)"/>
+          <param name="init_y" value="$(arg init_y_)"/>
+          <param name="init_z" value="$(arg init_z_)"/>
+          <remap from="~command" to="/position_cmd"/>
+          <remap from="~odometry" to="odom"/>
+    </node>
+
+    <node pkg="odom_visualization" name="odom_visualization" type="odom_visualization" output="screen">
+      <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml" />
+      <remap from="~odom" to="odom" />
+      <param name="robot_scale" value="1.0"/>
+    </node>
+    
+    <node pkg="planning" name="planning" type="planning" output="screen">
+
+      <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml" />
+
+      <remap from="/drone0/odom" to="odom"/>
+      <remap from="/drone0/gridmap_inflate" to="gridmap_inflate"/>
+      <remap from="/drone0/target" to="/target/odom"/>
+      <remap from="/drone0/triger" to="/triger"/>
+      <remap from="/drone0/goal" to="/move_base_simple/goal"/>
+      <remap from="/drone0/land_triger" to="/land_triger"/>
+      <remap from="/drone0/joy" to="/joy_main"/>
+
+      <remap from ="/map_ros/pose"   to = "/pcl_render_node/camera_pose"/> 
+      <remap from ="/map_ros/depth" to = "/drone0/depth"/>
+      <remap from ="/map_ros/cloud" to="/sync_pcl"/>
+
+      <param name="sdf_map/resolution"      value="0.05" /> 
+
+      <param name="sdf_map/ground_height"        value="-1.0"/>
+      <param name="sdf_map/map_size_x"   value="20.0" /> 
+      <param name="sdf_map/map_size_y"   value="20.0" />
+      <param name="sdf_map/map_size_z"   value="3.0" /> 
+
+      <param name="sdf_map/obstacles_inflation"     value="0.099" /> 
+      <param name="sdf_map/local_bound_inflate"    value="0.5"/>
+      <param name="sdf_map/local_map_margin" value="50"/>
+      <param name="sdf_map/default_dist"        value="5.0"/>
+      
+      <param name="sdf_map/p_hit"  value="0.65"/>
+      <param name="sdf_map/p_miss" value="0.35"/>
+      <param name="sdf_map/p_min"  value="0.12"/>
+      <param name="sdf_map/p_max"  value="0.90"/>
+      <param name="sdf_map/p_occ"  value="0.80"/>
+      <param name="sdf_map/min_ray_length" value="0.2"/>
+      <!-- 需要比depth_filter_maxdist长一点 -->
+      <param name="sdf_map/max_ray_length" value="3.0"/>
+      <param name="sdf_map/virtual_ceil_height"   value="-10"/>
+      <param name="sdf_map/optimistic" value="true" type="bool"/>
+      <param name="sdf_map/signed_dist" value="true" type="bool"/>
+
+      <param name="sdf_map/box_min_x" value="-7" type="double"/>
+      <param name="sdf_map/box_min_y" value="-15" type="double"/>
+      <param name="sdf_map/box_min_z" value="0" type="double"/>
+      <param name="sdf_map/box_max_x" value="7" type="double"/>
+      <param name="sdf_map/box_max_y" value="15" type="double"/>
+      <param name="sdf_map/box_max_z" value="3.0" type="double"/>
+
+      <param name="sdf_map/aabb_x" value="2.0" type="double"/>
+      <param name="sdf_map/aabb_y" value="2.0" type="double"/>
+      <param name="sdf_map/aabb_z" value="2.5" type="double"/>
+
+
+    <!-- # 0 RVIZ_GOAL, -->
+    <!-- # 1 FULL_STATE_GOAL, -->
+    <!-- # 2 PRE_SEQUENCE, -->
+      <param name="sdf_map/goal_method" value="1"/>
+
+  <!-- Patrick -->
+      <param name="sdf_map/prior_box0_x0" value="2.5"/>
+      <param name="sdf_map/prior_box0_y0" value="3.5"/>
+      <param name="sdf_map/prior_box0_z0" value="10.5"/>
+      <param name="sdf_map/prior_box0_x1" value="-2.5"/>
+      <param name="sdf_map/prior_box0_y1" value="-3.5"/>
+      <param name="sdf_map/prior_box0_z1" value="0.0"/>
+
+      <param name="map_ros/fx" value="240"/>
+      <param name="map_ros/fy" value="240"/>
+      <param name="map_ros/cx" value="320"/>
+      <param name="map_ros/cy" value="240"/>
+
+      <param name="map_ros/depth_filter_maxdist"   value="3.0"/>
+      <param name="map_ros/depth_filter_mindist"   value="0.2"/>
+      <param name="map_ros/depth_filter_margin"    value="2"/>
+      <param name="map_ros/k_depth_scaling_factor" value="1.0"/>
+      <param name="map_ros/skip_pixel" value="2"/>
+      <param name="map_ros/esdf_slice_height" value="0.7"/>
+      <param name="map_ros/visualization_truncate_height"   value="3.0"/>
+      <param name="map_ros/visualization_truncate_low"   value="0.09"/>
+      <param name="map_ros/show_occ_time"  value="false"/>
+      <param name="map_ros/show_esdf_time" value="false"/>
+      <param name="map_ros/show_all_map" value="true"/>
+      <param name="map_ros/frame_id"      value="world"/>
+
+      <param name="map_ros/gs_gather_radius" value="3.0"/>
+      <param name="map_ros/input_cam_pose" value="false"/>
+
+    </node>
+
+
+
+    <!-- <include file="$(find planning)/launch/planning.launch">
+      <arg name="rhosVisibility_" value="1000.0"/>
+      <arg name="rhoTracking_" value="1000.0"/>
+      <arg name="target_name_" value="/target_ekf_odom"/>
+    </include> -->
+
+
+  </group>
+</launch>
+

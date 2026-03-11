@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mujoco model="drone_scene">
+
+  <include file="drone_converted.xml"/>
+
+  <compiler angle="radian" meshdir="meshes" texturedir="."/>
+  <option timestep="0.002" integrator="RK4"/>
+
+  <default>
+    <joint damping="2" armature="0.02" frictionloss="0.02"/>
+    <geom solref="0.02 1" solimp="0.9 0.95 0.002" condim="3" friction="1 0.01 0.001"/>
+  </default>
+
+  <asset>
+    <texture name="sky" type="skybox" builtin="flat"
+             rgb1="0.96 0.96 0.96" rgb2="0.90 0.90 0.90"
+             width="256" height="256"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 2" dir="0 0 -1" diffuse="1 1 1" specular="0.2 0.2 0.2"/>
+    <camera name="maincam" pos="0.7 0.7 0.45" quat="0.9239 0 0 0.3827"/>
+    <geom name="floor" type="plane" pos="0 0 -0.3" size="2 2 0.1"
+          rgba="0.92 0.92 0.92 1" contype="1" conaffinity="1"/>
+
+    <!-- 柱子：圆柱，底部接地(z=-0.3)，顶部 z=1.4m，足够阻挡 1m 巡航高度 -->
+    <geom name="pillar" type="cylinder"
+          pos="1.2 0.8 0.55" size="0.12 0.85"
+          rgba="0.60 0.62 0.68 1" contype="1" conaffinity="1"/>
+
+    <!-- 桌子：桌面 + 4 条腿，桌面高度 0.45m（地面以上 0.75m） -->
+    <geom name="table_top" type="box"
+          pos="-0.8 -0.6 0.45" size="0.40 0.30 0.025"
+          rgba="0.72 0.52 0.30 1" contype="1" conaffinity="1"/>
+    <geom name="table_leg_fl" type="box"
+          pos="-0.43 -0.33 0.063" size="0.025 0.025 0.363"
+          rgba="0.72 0.52 0.30 1" contype="1" conaffinity="1"/>
+    <geom name="table_leg_fr" type="box"
+          pos="-0.43 -0.87 0.063" size="0.025 0.025 0.363"
+          rgba="0.72 0.52 0.30 1" contype="1" conaffinity="1"/>
+    <geom name="table_leg_bl" type="box"
+          pos="-1.17 -0.33 0.063" size="0.025 0.025 0.363"
+          rgba="0.72 0.52 0.30 1" contype="1" conaffinity="1"/>
+    <geom name="table_leg_br" type="box"
+          pos="-1.17 -0.87 0.063" size="0.025 0.025 0.363"
+          rgba="0.72 0.52 0.30 1" contype="1" conaffinity="1"/>
+
+    <!-- 目标抓取物体：圆柱杯，放置于桌面中心 -->
+    <!-- 桌面 z=0.475，cup 半高=0.06，质心 z=0.475+0.06=0.535 -->
+    <body name="cup" pos="-0.8 -0.6 0.535">
+      <freejoint name="cup_freejoint"/>
+      <geom name="cup_geom" type="cylinder"
+            size="0.035 0.06"
+            rgba="0.85 0.15 0.10 1"
+            mass="0.15"
+            contype="1" conaffinity="1"/>
+    </body>
+
+    <!-- 随机可移动障碍物：蓝色方块，放置于桌面偏前方（遮挡杯子的抓取路径） -->
+    <!-- 桌面 z=0.475，box 半高=0.04，质心 z=0.475+0.04=0.515 -->
+    <body name="obstacle_box" pos="-0.72 -0.52 0.515">
+      <freejoint name="obstacle_box_freejoint"/>
+      <geom name="obstacle_box_geom" type="box"
+            size="0.04 0.04 0.04"
+            rgba="0.15 0.40 0.85 1"
+            mass="0.12"
+            contype="1" conaffinity="1"/>
+    </body>
+
+  </worldbody>
+
+            
+
+<equality>
+  <!-- 两指镜像耦合：left = -right（两指轴在父系均为 -Y，需取反才能对称张合） -->
+  <joint joint1="arm_right_finger_joint" joint2="arm_left_finger_joint" polycoef="0 -1 0 0 0"/>
+</equality>
+
+<actuator>
+  <!-- 4 个旋翼：motor = ctrl -> torque（扭矩）
+       0..50：τmax=50N·m，稳态 ω≈(50-0.02)/2≈24.99rad/s（明显转起来）
+  -->
+  <motor name="rotor0_motor" joint="rotor0_joint" gear="1" ctrllimited="true" ctrlrange="0 50"/>
+  <motor name="rotor1_motor" joint="rotor1_joint" gear="1" ctrllimited="true" ctrlrange="0 50"/>
+  <motor name="rotor2_motor" joint="rotor2_joint" gear="1" ctrllimited="true" ctrlrange="0 50"/>
+  <motor name="rotor3_motor" joint="rotor3_joint" gear="1" ctrllimited="true" ctrlrange="0 50"/>
+
+  <!-- 机械臂 3 关节：position = ctrl -> 目标角度（舵机） -->
+  <position name="arm_pitch_servo"  joint="arm_pitch_joint"  kp="50" ctrlrange="0 1.5708"/>
+  <position name="arm_pitch2_servo" joint="arm_pitch2_joint" kp="50" ctrlrange="-1.5708 1.5708"/>
+  <position name="arm_roll_servo"   joint="arm_roll_joint"   kp="50" ctrlrange="-1.5708 1.5708"/>
+
+  <!-- 夹爪：控制右指，左指通过 equality 自动镜像；ctrl[7] -->
+  <position name="gripper_servo" joint="arm_right_finger_joint" kp="20" ctrlrange="-0.025 0.025"/>
+</actuator>
+  
+</mujoco>

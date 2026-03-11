@@ -1,0 +1,7 @@
+# Request: 输入关节角和世界系下的末端位姿
+float64[] thetas
+geometry_msgs/Pose end_pose
+---
+# Response: 返回世界系下的机体位姿
+geometry_msgs/Pose body_pose
+bool success

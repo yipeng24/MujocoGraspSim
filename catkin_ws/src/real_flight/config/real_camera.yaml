@@ -1,0 +1,66 @@
+# =============================================================
+# real_camera.yaml — 真实相机参数
+# 根据你的相机标定结果修改此文件，launch 文件会 load 进来
+# =============================================================
+
+# --- 相机内参（rostopic echo /camera/color/camera_info 获取）---
+map_ros:
+  fx: 384.0      # TODO: 替换为真实标定值
+  fy: 384.0      # TODO: 替换为真实标定值
+  cx: 320.0      # TODO: 替换为真实标定值
+  cy: 240.0      # TODO: 替换为真实标定值
+
+  # 深度图过滤范围（单位 m）
+  depth_filter_mindist: 0.3      # RealSense D435 最近有效距离
+  depth_filter_maxdist: 4.0      # 超过此距离的点丢弃
+  depth_filter_margin:  2        # 图像边缘忽略像素数
+  k_depth_scaling_factor: 1000.0 # 深度图像素值 → 米的缩放因子 (16UC1: 1000)
+  skip_pixel: 2                  # 每隔几个像素取一个点（降采样）
+
+  # 可视化参数
+  esdf_slice_height: 1.0
+  visualization_truncate_height: 3.0
+  visualization_truncate_low: 0.0
+  show_occ_time:  false
+  show_esdf_time: false
+  show_all_map:   true
+  frame_id:       world
+  input_cam_pose: false
+
+# --- SDF 地图参数 ---
+sdf_map:
+  ground_height: -0.5
+  obstacles_inflation: 0.35     # 和仿真保持一致
+  local_bound_inflate: 0.5
+  local_map_margin: 50
+  default_dist: 5.0
+  p_hit:  0.65
+  p_miss: 0.35
+  p_min:  0.12
+  p_max:  0.90
+  p_occ:  0.80
+  min_ray_length: 0.3           # 同 depth_filter_mindist
+  max_ray_length: 4.0           # 同 depth_filter_maxdist + 余量
+  virtual_ceil_height: -10
+  optimistic:   true
+  signed_dist:  true
+
+# --- 环境地图范围（根据实际飞行场地调整）---
+env_map:
+  resolution:   0.05
+  map_size_x:   10.0
+  map_size_y:   10.0
+  map_size_z:   3.0
+  map_center_x: 0.0
+  map_center_y: 0.0
+  map_center_z: 1.5
+
+# --- 目标物体地图（抓取时用，不抓取可忽略）---
+tgt_map:
+  resolution:   0.05
+  map_size_x:   1.0
+  map_size_y:   1.0
+  map_size_z:   1.0
+  map_center_x: 0.0
+  map_center_y: 0.0
+  map_center_z: 1.0

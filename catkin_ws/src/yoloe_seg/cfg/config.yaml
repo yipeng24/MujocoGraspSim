@@ -1,0 +1,50 @@
+# ── 输入话题 ──────────────────────────────────────────────────────────────
+sync_frame_topic: "/sync_frame_img"
+
+# ── YOLOE 模型参数 ────────────────────────────────────────────────────────
+model:
+  # yoloe-11l-seg.pt 会由 ultralytics 自动下载到 ~/.cache/ultralytics/
+  path: "yoloe-11l-seg.pt"
+  # 目标物体文本提示 → tgt_pcl
+  text_prompts: ["cup", "bottle", "cylinder"]
+  # 可移动障碍物文本提示 → obs_pcl（空列表则 BG 均归 env；有值则先匹配障碍物）
+  obstacle_prompts: ["box", "cube", "block"]
+  conf:   0.4
+  imgsz:  640
+  device: "auto"    # "auto" | "cuda" | "cpu"
+  alpha:  0.5       # overlay 透明度（可视化用）
+
+# ── 深度参数 ──────────────────────────────────────────────────────────────
+depth:
+  # mujoco_rgb_depth_pub.py 发布的是 float32 metres (32FC1)
+  encoding: "32FC1"
+  scale:    1.0     # 深度值已经是公制，无需缩放
+  min:      0.10    # metres
+  max:      5.0
+
+# ── 点云生成 ──────────────────────────────────────────────────────────────
+point_cloud:
+  stride:        2       # 像素下采样步长（2=每2像素取一点）
+  publish_empty: true
+  # YOLOE 自动使用 text_prompts 对应的检测类别建 FG mask
+  # 下面的 fg_class_ids 会被忽略（YOLOE 开放词汇模式）
+  fg_class_ids: "auto"
+
+# ── 相机内参（与 mujoco_perception/cfg/config.yaml 一致）────────────────
+# 424×240, fovy=60°: fx=fy≈207.8
+camera:
+  K: [207.8, 0.0, 212.0,
+      0.0,  207.8, 120.0,
+      0.0,  0.0,    1.0]
+
+# ── 输出话题 ──────────────────────────────────────────────────────────────
+output:
+  tgt_pcl_topic: "/yoloe_seg/tgt_pcl"
+  obs_pcl_topic: "/yoloe_seg/obs_pcl"   # 可移动障碍物（供 task_manager 分析）
+  env_pcl_topic: "/yoloe_seg/env_pcl"
+  syncframe_out: "/sync_frame_out"
+  mask_topic:    "/yoloe_seg/mask"
+  overlay_topic: "/yoloe_seg/overlay"
+
+# ── 可视化 ────────────────────────────────────────────────────────────────
+en_vis: true    # true → 额外发布 tgt/env 点云独立话题 + mask/overlay 图像

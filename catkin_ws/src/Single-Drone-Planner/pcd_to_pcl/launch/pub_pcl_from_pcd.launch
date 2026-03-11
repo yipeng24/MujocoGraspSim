@@ -1,0 +1,45 @@
+<launch>  
+   
+  <node pkg="pcd_to_pcl" name="pub_env_pcl_from_pcd" type="pub_pcl_from_pcd.py" output="screen">
+    <rosparam command="load" file="$(find pcd_to_pcl)/config/config_env.yaml" />
+    <param name="pcd_path" value="$(find pcd_to_pcl)/pcd/cube_60cm_ROS.pcd"/>
+    <param name="topic"    value="/pcl_from_pcd/env_pcl"/>
+    <param name="frame_id" value="world"/>
+    <param name="hz"       value="1"/>
+    <param name="latch"    value="true"/>
+    <param name="loop"     value="true"/>
+
+    <!-- hand stick pose topics (can be remapped outside) -->
+    <param name="hand_stick_pose_topic" value="/vicon/hand_stick/hand_stick"/>
+    <!-- ring cloud (enable + sizes) -->
+    <param name="stick_ring_enable"     value="true"/>
+    <param name="stick_ring_outer_size" value="[1.2, 1.0]"/>
+    <param name="stick_ring_inner_size" value="[0.6, 0.35]"/>
+    <param name="stick_ring_res"        value="0.02"/>
+    <param name="stick_ring_rgb"        value="[255, 0, 0]"/>
+    <param name="stick_ring_pose_topic" value="stick_ring_pose"/>
+    <param name="stick_ring_offset_z"   value="-0.28"/>
+
+    <!-- 地面 -->
+    <param name="ground_enable" value="true"/>
+    <param name="ground_size"   value="[8.0, 6.0]"/>   <!-- 地面 x、y 尺寸（米） -->
+    <param name="ground_z"      value="0.0"/>          <!-- 地面高度 -->
+    <param name="ground_res"    value="0.08"/>         <!-- 点间距，越小越密 -->
+    <param name="ground_rgb"    value="[150,150,150]"/><!-- 地面颜色 -->
+
+  </node>
+
+
+  <node pkg="pcd_to_pcl" name="pub_tgt_pcl_from_pcd" type="pub_pcl_from_pcd.py" output="screen">
+    <rosparam command="load" file="$(find pcd_to_pcl)/config/config_tgt.yaml" />
+    <param name="pcd_path" value="$(find pcd_to_pcl)/pcd/cup_V1_ROS.pcd"/>
+    <param name="topic"    value="/pcl_from_pcd/tgt_pcl"/>
+    <param name="frame_id" value="world"/>
+    <param name="hz"       value="1"/>
+    <param name="latch"    value="true"/>
+    <param name="loop"     value="true"/>
+
+  </node>
+
+
+ </launch>

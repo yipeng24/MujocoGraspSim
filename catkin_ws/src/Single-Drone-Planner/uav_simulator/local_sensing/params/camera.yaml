@@ -1,0 +1,21 @@
+# cam_width:  320
+# cam_height: 240
+# cam_fx:     120
+# cam_fy:     120
+# cam_cx:     160
+# cam_cy:     120
+
+
+cam_width:  640
+cam_height: 480
+cam_fx:     240
+cam_fy:     240
+cam_cx:     320
+cam_cy:     240
+
+# cam_width:  752
+# cam_height: 480
+# cam_fx:     258.654
+# cam_fy:     257.296
+# cam_cx:     367.215
+# cam_cy:     248.375

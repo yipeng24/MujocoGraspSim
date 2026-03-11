@@ -1,0 +1,77 @@
+<launch>
+
+  <node pkg="plan_env_lod" name="gen_occmap_node" type="gen_occmap_node" output="screen">
+
+    <remap from="/odom" to="odom"/>
+    <remap from="/gridmap_inflate" to="gridmap_inflate"/>
+    <remap from="/target" to="/target/odom"/>
+    <remap from="/triger" to="/triger"/>
+    <remap from="/goal" to="/move_base_simple/goal"/>
+    <remap from="/land_triger" to="/land_triger"/>
+    <remap from="/joy" to="/joy_main"/>
+
+    <remap from ="/map_ros/pose"  to = "/pcl_render_node/camera_pose"/> 
+    <remap from ="/map_ros/depth" to = "/depth"/>
+    <remap from ="/map_ros/cloud" to="/sync_pcl"/>
+
+    <param name ="syncframe_topic" value="/sync_frame_out"/>
+
+    <param name="sdf_map/ground_height"        value="-1.0"/>
+
+    <param name="tgt_map/resolution"   value="0.005" /> 
+    <param name="tgt_map/map_size_x"   value="0.6" /> 
+    <param name="tgt_map/map_size_y"   value="0.6" />
+    <param name="tgt_map/map_size_z"   value="0.4" /> 
+    <param name="tgt_map/map_center_x" value="0.0" /> 
+    <param name="tgt_map/map_center_y" value="0.0" />
+    <param name="tgt_map/map_center_z" value="0.7" /> 
+
+    <param name="env_map/resolution"   value="0.05" /> 
+    <param name="env_map/map_size_x"   value="30.0" /> 
+    <param name="env_map/map_size_y"   value="30.0" />
+    <param name="env_map/map_size_z"   value="5.0" /> 
+    <param name="env_map/map_center_x" value="0.0" /> 
+    <param name="env_map/map_center_y" value="0.0" />
+    <param name="env_map/map_center_z" value="0.35" /> 
+
+    <param name="sdf_map/obstacles_inflation"     value="0.099" /> 
+    <param name="sdf_map/local_bound_inflate"    value="0.5"/>
+    <param name="sdf_map/local_map_margin" value="50"/>
+    <param name="sdf_map/default_dist"        value="5.0"/>
+    
+    <param name="sdf_map/p_hit"  value="0.65"/>
+    <param name="sdf_map/p_miss" value="0.35"/>
+    <param name="sdf_map/p_min"  value="0.12"/>
+    <param name="sdf_map/p_max"  value="0.90"/>
+    <param name="sdf_map/p_occ"  value="0.80"/>
+    <param name="sdf_map/min_ray_length" value="0.2"/>
+    <!-- 需要比depth_filter_maxdist长一点 -->
+    <param name="sdf_map/max_ray_length" value="3.0"/>
+    <param name="sdf_map/virtual_ceil_height"   value="-10"/>
+    <param name="sdf_map/optimistic" value="true" type="bool"/>
+    <param name="sdf_map/signed_dist" value="true" type="bool"/>
+
+    <param name="map_ros/fx" value="240"/>
+    <param name="map_ros/fy" value="240"/>
+    <param name="map_ros/cx" value="320"/>
+    <param name="map_ros/cy" value="240"/>
+
+    <param name="map_ros/depth_filter_maxdist"   value="3.0"/>
+    <param name="map_ros/depth_filter_mindist"   value="0.2"/>
+    <param name="map_ros/depth_filter_margin"    value="2"/>
+    <param name="map_ros/k_depth_scaling_factor" value="1.0"/>
+    <param name="map_ros/skip_pixel" value="2"/>
+    <param name="map_ros/esdf_slice_height" value="0.7"/>
+    <param name="map_ros/visualization_truncate_height"   value="3.0"/>
+    <param name="map_ros/visualization_truncate_low"   value="-1.0"/>
+    <param name="map_ros/show_occ_time"  value="false"/>
+    <param name="map_ros/show_esdf_time" value="false"/>
+    <param name="map_ros/show_all_map" value="true"/>
+    <param name="map_ros/frame_id"      value="world"/>
+
+    <param name="map_ros/input_cam_pose" value="false"/>
+
+  </node>
+
+</launch>
+

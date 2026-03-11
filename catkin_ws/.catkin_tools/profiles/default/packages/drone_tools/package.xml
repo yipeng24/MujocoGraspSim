@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>drone_tools</name>
+  <version>0.1.0</version>
+  <description>Optional tool nodes: 2D goal picker GUI and keyboard/joystick position control.</description>
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>quadrotor_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+</package>

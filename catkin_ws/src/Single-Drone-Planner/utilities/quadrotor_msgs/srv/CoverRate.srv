@@ -1,0 +1,5 @@
+geometry_msgs/Point[] cams_p
+sensor_msgs/Image[] depth_unknown_vec
+# sensor_msgs/PointCloud2 cloud_vec
+---
+sensor_msgs/Image cover_rate

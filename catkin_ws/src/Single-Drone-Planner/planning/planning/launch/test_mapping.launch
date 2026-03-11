@@ -1,0 +1,25 @@
+<launch>
+
+
+  <node pkg="mockamap" type="mockamap_node" name="mockamap_node" output="screen">
+    <rosparam file="$(find uav_simulator)/config/mockamap.yaml"/>
+    <remap from="/mock_map" to="/global_map"/>
+  </node>
+
+  <node pkg="local_sensing_node" type="pcl_render_node" name="pcl_render_node" output="screen">
+    <rosparam command="load" file="$(find local_sensing_node)/params/camera.yaml" />
+    <param name="sensing_horizon" value="10.0" />
+    <param name="sensing_rate" value="15.0"/>
+    <param name="estimation_rate" value="15.0"/>
+
+    <remap from="~global_map" to="/global_map"/>
+    <remap from="~odometry" to="/drone0/odom"/>
+    <!-- <remap from="~odometry" to="/dual_chaser/wrapper/desired_odom"/> -->
+    <!-- <remap from="~odometry" to="/visual_slam/odom"/> -->
+    <remap from="~depth" to="/drone0/depth"/>
+    <remap from="~local_cloud" to="local_cloud"/>
+  </node>
+
+
+
+</launch>

@@ -1,0 +1,37 @@
+# ── 通用相机参数（与 drone_converted.xml fovy=60°, 424x240 一致）──────────
+camera:
+  width:  424
+  height: 240
+  fovy:   60.0
+  depth_min: 0.15   # metres
+  depth_max: 5.0    # metres
+  publish_hz: 10.0
+
+# ── GT Segmentation Pipeline ──────────────────────────────────────────────
+gt_seg:
+  # 目标物体 body 名称（freejoint bodies）
+  target_body_names: ["cup"]
+  # 可移动障碍物：留空 [] 表示自动检测（所有 freejoint body 且不在 target 中）
+  # 填写列表则只检测指定 body，例如 ["obstacle_box"]
+  movable_obstacle_names: []
+  # topic names
+  tgt_pcl_topic:  "/gt_seg/tgt_pcl"
+  obs_pcl_topic:  "/gt_seg/obs_pcl"      # 可移动障碍物（供 task_manager 分析）
+  env_pcl_topic:  "/gt_seg/env_pcl"      # 静态环境（可视化）
+  syncframe_topic: "/sync_frame_pcl_world"
+  rgb_topic:      "/gt_seg/image_rgb"
+  overlay_topic:  "/gt_seg/overlay"
+  # subsampling stride
+  stride: 2
+  en_vis: true
+  self_clear_radius: 0.35
+
+# ── RGB + Depth Publisher (feeds YOLOE pipeline) ─────────────────────────
+rgb_depth:
+  syncframe_topic: "/sync_frame_img"
+  # depth encoding published into the SyncFrame image message
+  # "32FC1" = float32 metres (MuJoCo native)
+  depth_encoding: "32FC1"
+  # subsampling stride for visualization point cloud (not used by YOLOE)
+  stride: 1
+  en_vis: false

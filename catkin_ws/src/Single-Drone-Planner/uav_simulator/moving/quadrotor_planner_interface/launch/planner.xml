@@ -1,0 +1,26 @@
+<launch>
+  <arg name="map_size_x_"/>
+  <arg name="map_size_y_"/>
+  <arg name="map_size_z_"/>
+  <arg name="init_x_"/>
+  <arg name="init_y_"/>
+  <arg name="init_z_"/> 
+  <arg name="max_vel_"/>
+  <arg name="max_acc_"/>
+  <arg name="odometry_topic"/>
+  <arg name="plan_hz_"/>
+  <arg name="ctrl_hz_"/>
+
+  <node pkg="quadrotor_planner_interface" 
+   type="quadrotor_planner_interface_test_node" 
+   name="quadrotor_planner_interface_test_node" output="screen"> 
+    <remap from="~position_cmd" to="/planning/pos_cmd"/>
+    <remap from="~odom" to="$(arg odometry_topic)"/>
+
+    <param name="planning/init_state_x" value="$(arg init_x_)"/>
+    <param name="planning/init_state_y" value="$(arg init_y_)"/>
+    <param name="planning/init_state_z" value="$(arg init_z_)"/>
+    <param name="planning/plan_hz" value="$(arg plan_hz_)"/>
+    <param name="planning/ctrl_hz" value="$(arg ctrl_hz_)"/>
+  </node>
+</launch>

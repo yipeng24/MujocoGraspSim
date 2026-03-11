@@ -1,0 +1,57 @@
+<launch>
+
+  <arg name="cmd_topic" value="/mavros/setpoint_raw/attitude" />
+  <arg name="odom_topic" value="odom" />
+  <arg name="imu_topic" value="/mavros/imu/data" />
+  <arg name="mesh_topic" value="/mod/mesh" />
+  <arg name="state_topic" value="/mavros/state" />
+  <arg name="set_mode_server" value="/mavros/set_mode" />
+  <arg name="joint_state_est_topic" value="/joint_state_est_sim" />
+	<arg name="rpm_topic" value="/mavros/esc_telemetry" />
+	<arg name="rc_topic" value="/mavros/rc/in" />
+	<arg name="use_sim" default="true" />
+	<arg name="use_joy" default="true" />
+  <arg name="cmd_theta_topic" default="/joint_state_cmd" />
+
+  <group ns="drone0">
+    <!-- ! method 1 将 cmd 直接设置为 odom -->
+    <!-- <node pkg="poscmd_2_odom" name="drone_poscmd_2_odom" type="poscmd_2_odom" output="screen">
+          <param name="init_x" value="-1.5"/>
+          <param name="init_y" value="0.0"/>
+          <param name="init_z" value="1.5"/>
+          <remap from="~command" to="/position_cmd"/>
+          <remap from="~odometry" to="$(arg odom_topic)"/>
+    </node> -->
+
+    <!-- ! method 2 带动力学 需要 px4_ctrl -->
+    <!-- <node pkg="px4ctrl" type="px4ctrl_node" name="px4ctrl" output="screen">
+      <remap from="~odom" to="$(arg odom_topic)" />
+      <remap from="~cmd" to="$(arg cmd_topic)" />
+      <rosparam command="load" file="$(find px4ctrl)/config/ctrl_param_fpv.yaml" /> -->
+    <!-- </node> -->
+
+    <rosparam command="load" file="$(find fake_mod)/params/simulator.yaml" />
+
+    <node pkg="fake_mod" type="fake_mod_node" name="fake_mod_node" output="screen" required="true">
+      <remap from ="~odom" to="$(arg odom_topic)"/>
+      <remap from ="~imu" to="$(arg imu_topic)"/>
+      <remap from ="~cmd" to="$(arg cmd_topic)"/>
+      <remap from ="~mesh" to="$(arg mesh_topic)"/>
+      <remap from ="~state" to="$(arg state_topic)"/>
+      <remap from ="~rpm" to="$(arg rpm_topic)"/>
+      <remap from ="~set_mode" to="$(arg set_mode_server)"/>
+      <remap from ="~joint_state_est" to="$(arg joint_state_est_topic)"/>
+
+      <remap from ="~cmd_theta" to="$(arg cmd_theta_topic)"/>
+    </node>
+
+    <node pkg="fake_rc" type="fake_rc_node" name="fake_rc_node" output="screen">
+      <param name="fake_rc/zero_tolerance"  value="0.05"/>
+      <param name="fake_rc/use_joy"  value="$(arg use_joy)"/>
+      <param name="fake_rc/use_sim"  value="$(arg use_sim)"/>
+      <remap from ="rcin" to="$(arg rc_topic)"/>
+      <remap from ="joy" to="/joy_free"/>
+    </node>
+
+  </group>
+</launch>

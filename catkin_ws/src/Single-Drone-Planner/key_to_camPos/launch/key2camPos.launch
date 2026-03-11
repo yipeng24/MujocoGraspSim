@@ -1,0 +1,15 @@
+<launch>  
+   
+  <node pkg="key_to_camPos" name="key2joy_node_free" type="key_to_joy_free.py" output="screen">
+  </node>
+
+  <node pkg="key_to_camPos" type="joy2camPos" name="joy2camPos_free" output="screen">
+    <remap from="/joy2camPos_free/odom" to="/free_cam_pos"/>
+    <remap from="/joy" to="/joy_free"/>
+    <param name="pub_cam" value="true"/>
+  </node>
+
+ </launch>
+
+
+

@@ -1,0 +1,140 @@
+<launch>
+  <!--
+    yoloe_pipeline.launch
+    =====================
+    对照线：MuJoCo RGB + Depth → YOLOE → point cloud → planner
+
+    数据流：
+      mujoco_rgb_depth_pub.py
+        → /sync_frame_img (SyncFrame: rgb + depth + cam_pose)
+                ↓
+      yoloe_seg_node.py
+        → /yoloe_seg/tgt_pcl, /yoloe_seg/env_pcl (可视化)
+        → /sync_frame_out (SyncFrame: tgt_pcl + env_pcl)
+                ↓
+      bridge_node (PclSyncNode, world frame mode)
+        → /sync_frame_pcl_world
+                ↓
+      planning node
+        → /position_cmd_planner
+  -->
+
+  <arg name="model_path"  default="$(find drone_urdf)/scene_drone.xml"/>
+  <arg name="config_path" default="$(find mujoco_perception)/cfg/config.yaml"/>
+  <arg name="yoloe_config_path"
+       default="$(find yoloe_seg)/cfg/config.yaml"/>
+  <arg name="use_task_manager" default="true"/>
+  <arg name="task_auto_start"  default="false"/>
+
+  <!-- ================================================================ -->
+  <!-- 1. RGB + Depth Publisher                                          -->
+  <!-- ================================================================ -->
+  <node pkg="mujoco_perception" type="mujoco_rgb_depth_pub.py"
+        name="mujoco_rgb_depth_pub" output="screen" required="true">
+    <env name="MUJOCO_GL" value="osmesa"/>
+    <param name="model_path"  value="$(arg model_path)"/>
+    <param name="config_path" value="$(arg config_path)"/>
+  </node>
+
+  <!-- ================================================================ -->
+  <!-- 2. YOLOE Segmentation Node                                        -->
+  <!-- ================================================================ -->
+  <node pkg="yoloe_seg" type="yoloe_seg_node.py"
+        name="yoloe_seg" output="screen">
+    <param name="config_path" value="$(arg yoloe_config_path)"/>
+  </node>
+
+  <!-- ================================================================ -->
+  <!-- 3. bridge_node: PclSyncNode (world frame mode)                   -->
+  <!-- Subscribes: /yoloe_seg/tgt_pcl + /yoloe_seg/env_pcl             -->
+  <!-- Publishes:  /sync_frame_pcl_world                                -->
+  <!-- ================================================================ -->
+  <node pkg="bridge_node" name="bridge_node_pcl_sync"
+        type="bridge_node" output="screen">
+    <param name="enable_pcl_sync"      value="true"/>
+    <param name="use_world_frame_pcl"  value="true"/>
+    <param name="tgt_topic"  value="/yoloe_seg/tgt_pcl"/>
+    <param name="env_topic"  value="/yoloe_seg/env_pcl"/>
+    <param name="out_topic"  value="/sync_frame_pcl_world"/>
+    <param name="queue_size" value="20"/>
+    <param name="slop"       value="0.3"/>
+  </node>
+
+  <!-- ================================================================ -->
+  <!-- 4. Planning node (identical config to gt_pipeline.launch)        -->
+  <!-- ================================================================ -->
+  <node pkg="planning" type="planning" name="planning" output="screen">
+    <param name="config_path" value="$(find planning)/config/config.yaml"/>
+    <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml"/>
+
+    <param name="sdf_map/goal_method"         value="1"/>
+    <param name="sdf_map/ground_height"        value="-0.5"/>
+    <param name="sdf_map/obstacles_inflation"  value="0.35"/>
+    <param name="sdf_map/local_bound_inflate"  value="0.5"/>
+    <param name="sdf_map/local_map_margin"     value="50"/>
+    <param name="sdf_map/default_dist"         value="5.0"/>
+    <param name="sdf_map/p_hit"   value="0.65"/>
+    <param name="sdf_map/p_miss"  value="0.35"/>
+    <param name="sdf_map/p_min"   value="0.12"/>
+    <param name="sdf_map/p_max"   value="0.90"/>
+    <param name="sdf_map/p_occ"   value="0.80"/>
+    <param name="sdf_map/min_ray_length" value="0.2"/>
+    <param name="sdf_map/max_ray_length" value="5.0"/>
+    <param name="sdf_map/virtual_ceil_height" value="-10"/>
+    <param name="sdf_map/optimistic"  value="true"  type="bool"/>
+    <param name="sdf_map/signed_dist" value="true"  type="bool"/>
+
+    <param name="env_map/resolution"   value="0.05"/>
+    <param name="env_map/map_size_x"   value="10.0"/>
+    <param name="env_map/map_size_y"   value="10.0"/>
+    <param name="env_map/map_size_z"   value="3.0"/>
+    <param name="env_map/map_center_x" value="0.0"/>
+    <param name="env_map/map_center_y" value="0.0"/>
+    <param name="env_map/map_center_z" value="1.5"/>
+
+    <param name="tgt_map/resolution"   value="0.005"/>
+    <param name="tgt_map/map_size_x"   value="0.6"/>
+    <param name="tgt_map/map_size_y"   value="0.6"/>
+    <param name="tgt_map/map_size_z"   value="0.3"/>
+    <param name="tgt_map/map_center_x" value="0.0"/>
+    <param name="tgt_map/map_center_y" value="0.0"/>
+    <param name="tgt_map/map_center_z" value="0.5"/>
+
+    <param name="use_world_pcl"   value="true"/>
+    <param name="syncframe_topic" value="/sync_frame_pcl_world"/>
+
+    <param name="map_ros/frame_id"          value="world"/>
+    <param name="map_ros/show_all_map"      value="true"/>
+    <param name="map_ros/show_occ_time"     value="false"/>
+    <param name="map_ros/show_esdf_time"    value="false"/>
+    <param name="map_ros/esdf_slice_height" value="1.0"/>
+    <param name="map_ros/visualization_truncate_height" value="3.0"/>
+    <param name="map_ros/visualization_truncate_low"    value="0.0"/>
+    <param name="map_ros/input_cam_pose"    value="false"/>
+    <param name="map_ros/fx" value="207.8"/>
+    <param name="map_ros/fy" value="207.8"/>
+    <param name="map_ros/cx" value="212.0"/>
+    <param name="map_ros/cy" value="120.0"/>
+
+    <remap from="~odom"               to="/odom"/>
+    <remap from="~goal"               to="/move_base_simple/goal"/>
+    <remap from="~uam_state_goal_cmd" to="/uam_state_goal_cmd"/>
+    <remap from="~triger"             to="/traj_start_trigger"/>
+    <remap from="~land_triger"        to="/land_triger"/>
+    <remap from="~joint_state_est"    to="/joint_states"/>
+    <remap from="~position_cmd"       to="/position_cmd_planner"/>
+  </node>
+
+  <!-- ================================================================ -->
+  <!-- 5. Task Manager (occlusion detection + sequencing FSM)           -->
+  <!-- ================================================================ -->
+  <group if="$(arg use_task_manager)">
+    <!-- Set perception prefix before nodes start -->
+    <param name="/occlusion_analyzer/perception_prefix" value="yoloe_seg"/>
+    <include file="$(find task_manager)/launch/task_manager.launch">
+      <arg name="config_path" value="$(find task_manager)/cfg/config.yaml"/>
+      <arg name="auto_start"  value="$(arg task_auto_start)"/>
+    </include>
+  </group>
+
+</launch>

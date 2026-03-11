@@ -1,0 +1,190 @@
+ch_rc_sdf:
+
+  # 仅用来 collision_check isInMap
+  col_check_map_size:
+    x: 1.5
+    y: 1.5
+    z: 3.0
+
+  resolution: 0.01
+
+  box_num: 4
+  default_dist: 5.0
+  
+  box0:
+    size_x: 1.0
+    size_y: 1.0
+    size_z: 0.5
+    shell_thickness: 0.05
+
+    T_2_last:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+
+    Ang_2_last:
+      ang_id: 0 # 每个关节一个自由度 0 roll 1 pitch 2 yaw
+      init_ang: 0.0
+
+    # box_frame原点相对box中心的平移
+    ori_x: 0.0
+    ori_y: 0.0
+    ori_z: 0.0
+
+    disk_num: 1
+    line_num: 1
+
+    disk0:
+      radius: 0.17
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      roll: 0.0
+      pitch: 0.0
+      yaw: 0.0
+
+    line0:
+      length: 0.15
+      x: -0.015
+      y: 0.0
+      z: 0.0
+      roll: 0.0
+      pitch: 90.0
+      yaw: 0.0
+
+  # pitch 0
+  box1:
+    size_x: 1.2
+    size_y: 0.4
+    size_z: 0.4
+    shell_thickness: 0.025
+
+    # 确定box位置
+    T_2_last:
+      x: -0.015
+      y: 0.001
+      z: -0.096
+
+    Ang_2_last:
+      ang_id: 1 # 每个关节一个自由度 0 roll 1 pitch 2 yaw
+      init_ang: 0.0
+
+    # box_frame原点相对box中心的平移
+    # 移动grid原点
+    ori_x: -0.15
+    ori_y: 0.0
+    ori_z: 0.0
+
+    disk_num: 0
+    line_num: 2
+
+    # 原始直线沿着x+方向
+    line0:
+      length: 0.3
+      x: -0.1
+      y: 0.0
+      z: 0.0
+      roll: 0.0
+      pitch: 0.0
+      yaw: 0.0
+
+    # 电池
+    line1:
+      length: 0.12
+      x: -0.065
+      y: -0.06
+      z: 0.0
+      roll: 0.0
+      pitch: 0.0
+      yaw: 90.0
+
+
+  # pitch 2
+  box2:
+    size_x: 0.4
+    size_y: 0.4
+    size_z: 0.4
+    shell_thickness: 0.04
+
+    T_2_last:
+      x: 0.15
+      y: -0.0012
+      z: 0.0
+
+    Ang_2_last:
+      ang_id: 1 # 每个关节一个自由度 0 roll 1 pitch 2 yaw
+      init_ang: -0.2
+
+    # box_frame原点相对box中心的平移
+    ori_x: 0.0
+    ori_y: 0.0
+    ori_z: 0.0
+
+    disk_num: 0
+    line_num: 1
+
+    # 原始直线沿着x+方向
+    line0:
+      length: 0.08
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      roll: 0.0
+      pitch: 0.0
+      yaw: 0.0
+
+  # roll 带着物体
+  box3:
+    size_x: 0.5
+    size_y: 0.5
+    size_z: 0.5
+    shell_thickness: 0.002
+
+    T_2_last:
+      x: 0.12
+      y: 0.0
+      z: 0.0006
+
+    Ang_2_last:
+      ang_id: 0 # 每个关节一个自由度 0 roll 1 pitch 2 yaw
+      init_ang: 0.0
+
+    # box_frame原点相对box中心的平移
+    ori_x: 0.0
+    ori_y: 0.0
+    ori_z: 0.0
+
+    disk_num: 0
+    line_num: 3
+
+    # 原始直线沿着x+方向
+    line0:
+      length: 0.1
+      x: -0.0420000000000009
+      y: 0.05
+      z: 0.0
+      roll: 0.0
+      pitch: 0.0
+      yaw: 0.0
+
+    line1:
+      length: 0.1
+      x: -0.0420000000000009
+      y: -0.05
+      z: 0.0
+      roll: 0.0
+      pitch: 0.0
+      yaw: 90.0
+
+    line2:
+      length: 0.1
+      x: -0.0420000000000009
+      y: -0.05
+      z: 0.0
+      roll: 0.0
+      pitch: 0.0
+      yaw: 0.0
+
+
+
+

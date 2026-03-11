@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="drone_urdf">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.000907475706001883 -0.000423670074537461 0.0111491466794645"
+        rpy="0 0 0" />
+      <mass
+        value="0.488631998773489" />
+      <inertia
+        ixx="0.0003394146450622"
+        ixy="-5.47895747935371E-09"
+        ixz="7.77339334748355E-06"
+        iyy="0.000309589237715915"
+        iyz="-3.22767709492754E-07"
+        izz="0.000578730084074586" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="arm_pitch_link">
+    <inertial>
+      <origin
+        xyz="-0.0398453774314292 0.0119005506832749 -0.00382043114387848"
+        rpy="0 0 0" />
+      <mass
+        value="0.27884808487173" />
+      <inertia
+        ixx="0.000207610406680709"
+        ixy="1.37728047107927E-08"
+        ixz="-2.80793613991633E-05"
+        iyy="0.000276261970239362"
+        iyz="-1.34606428475476E-10"
+        izz="0.000276825987522781" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/arm_link_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/arm_link_pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="-0.00900000000000107 -0.00959999999999346 -0.108564971157456"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="arm_pitch_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="0.0"
+      upper="1.57079632679489"
+      effort="1"
+      velocity="3.14159265358979" />
+  </joint>
+  <link
+    name="arm_pitch2_link">
+    <inertial>
+      <origin
+        xyz="-0.023516938721574 4.18532853542486E-06 -0.00768194746699748"
+        rpy="0 0 0" />
+      <mass
+        value="0.0210875044546739" />
+      <inertia
+        ixx="6.39715585052796E-06"
+        ixy="-2.41805257406697E-09"
+        ixz="-1.19894052482399E-07"
+        iyy="4.08923763224478E-06"
+        iyz="-1.32573706392634E-09"
+        izz="3.22008349508992E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/arm_link_pitch2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/arm_link_pitch2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_pitch2_joint"
+    type="revolute">
+    <origin
+      xyz="0.121750000000001 0.00854999999999909 0"
+      rpy="0 0 0" />
+    <parent
+      link="arm_pitch_link" />
+    <child
+      link="arm_pitch2_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.57079632679489"
+      upper="1.57079632679489"
+      effort="1"
+      velocity="3.14159265358979" />
+  </joint>
+  <link
+    name="arm_roll_link">
+    <inertial>
+      <origin
+        xyz="0.0214596036747811 -4.16333634234434E-17 6.93889390390723E-16"
+        rpy="0 0 0" />
+      <mass
+        value="0.0484341554265054" />
+      <inertia
+        ixx="1.16041391569966E-05"
+        ixy="-5.47837553248285E-22"
+        ixz="-7.81037589659039E-22"
+        iyy="1.03955470549503E-05"
+        iyz="-1.63997385498497E-21"
+        izz="1.15999333554083E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/arm_link_roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/arm_link_roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_roll_joint"
+    type="revolute">
+    <origin
+      xyz="-0.0127499999999994 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="arm_pitch2_link" />
+    <child
+      link="arm_roll_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-1.57079632679489"
+      upper="1.57079632679489"
+      effort="1"
+      velocity="3.14159265358979" />
+  </joint>
+  <link
+    name="arm_right_finger_link">
+    <inertial>
+      <origin
+        xyz="0.0266572620419732 0.00731144395006261 -2.77555756156289E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.0137580473580037" />
+      <inertia
+        ixx="7.64772710245584E-07"
+        ixy="5.27071645206675E-07"
+        ixz="-1.72870352469125E-21"
+        iyy="4.65933927709925E-06"
+        iyz="-8.03457821129638E-22"
+        izz="4.43352365698545E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/arm_link_right_finger.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/arm_link_right_finger.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_right_finger_joint"
+    type="prismatic">
+    <origin
+      xyz="0.041 0 0"
+      rpy="-3.14159265358979 0 0" />
+    <parent
+      link="arm_roll_link" />
+    <child
+      link="arm_right_finger_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-1.57079632679489"
+      upper="1.57079632679489"
+      effort="1"
+      velocity="3.14159265358979" />
+  </joint>
+  <link
+    name="arm_left_finger_link">
+    <inertial>
+      <origin
+        xyz="0.0266572620419732 0.00731144395006227 1.38777878078145E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.0137580473580037" />
+      <inertia
+        ixx="7.64772710245591E-07"
+        ixy="5.27071645206696E-07"
+        ixz="-1.62476061272331E-22"
+        iyy="4.65933927709924E-06"
+        iyz="3.48473813235149E-23"
+        izz="4.43352365698545E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/arm_link_left_finger.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/arm_link_left_finger.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="arm_left_finger_joint"
+    type="prismatic">
+    <origin
+      xyz="0.041 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="arm_roll_link" />
+    <child
+      link="arm_left_finger_link" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.57079632679489"
+      upper="1.57079632679489"
+      effort="1"
+      velocity="3.14159265358979" />
+  </joint>
+  <link
+    name="rotor0_link">
+    <inertial>
+      <origin
+        xyz="4.10028894379244E-07 2.175982592445E-07 0.00394569070499525"
+        rpy="0 0 0" />
+      <mass
+        value="0.00513321535811529" />
+      <inertia
+        ixx="4.89102637484774E-06"
+        ixy="-9.87903196414219E-11"
+        ixz="-2.33305509477106E-11"
+        iyy="4.89089750229697E-06"
+        iyz="-1.06898081652699E-11"
+        izz="9.751174160399E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/rotor_0.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/rotor_0.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rotor0_joint"
+    type="continuous">
+    <origin
+      xyz="0.123743686707645 0.123743686707643 0.0211606308991274"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="rotor0_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="rotor1_link">
+    <inertial>
+      <origin
+        xyz="-1.75372556490694E-07 8.4725947091524E-09 0.00390632506972198"
+        rpy="0 0 0" />
+      <mass
+        value="0.00513323233563622" />
+      <inertia
+        ixx="4.89095330315956E-06"
+        ixy="2.43437422692745E-11"
+        ixz="6.45691578496296E-12"
+        iyy="4.89092670347586E-06"
+        iyz="-1.632797354479E-12"
+        izz="9.75113033820885E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/rotor_1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/rotor_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rotor1_joint"
+    type="continuous">
+    <origin
+      xyz="-0.123743686707647 0.123743686707645 0.0212"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="rotor1_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="rotor2_link">
+    <inertial>
+      <origin
+        xyz="-4.10028889119562E-07 -2.17598259969615E-07 0.00390632160412273"
+        rpy="0 0 0" />
+      <mass
+        value="0.0051332153581153" />
+      <inertia
+        ixx="4.89102637484776E-06"
+        ixy="-9.87903196591731E-11"
+        ixz="2.33305509491031E-11"
+        iyy="4.89089750229696E-06"
+        iyz="1.06898081663707E-11"
+        izz="9.75117416039901E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/rotor_2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/rotor_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rotor2_joint"
+    type="continuous">
+    <origin
+      xyz="-0.123743686707646 -0.123743686707645 0.0212"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="rotor2_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="rotor3_link">
+    <inertial>
+      <origin
+        xyz="1.75372556088238E-07 -8.47259472996909E-09 0.00390632506972164"
+        rpy="0 0 0" />
+      <mass
+        value="0.00513323233563622" />
+      <inertia
+        ixx="4.89095330315957E-06"
+        ixy="2.43437422700128E-11"
+        ixz="-6.45691578349963E-12"
+        iyy="4.89092670347583E-06"
+        iyz="1.63279735632465E-12"
+        izz="9.75113033820883E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/rotor_3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="/workspace/catkin_ws/src/drone_urdf/meshes/rotor_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rotor3_joint"
+    type="continuous">
+    <origin
+      xyz="0.123743686707646 -0.123743686707646 0.0212"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="rotor3_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+</robot>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mavros_sim</name>
+  <version>0.1.0</version>
+  <description>Fake MAVROS interface for MuJoCo simulation. Bridges px4ctrl with mujoco_ros_bridge.</description>
+  <maintainer email="user@todo.todo">user</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>mavros_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+</package>

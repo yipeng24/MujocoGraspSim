@@ -1,0 +1,107 @@
+#########################################################################
+# ⭐⭐⭐  Set parameters carefully for satisfied performance!   ⭐⭐⭐ #
+#########################################################################
+
+mass        : 1.15 # kg 
+gra         : 9.81 
+pose_solver : 3     # 0:From ZhepeiWang (drag & less singular) 1:From ZhepeiWang, 2:From rotor-drag    
+ctrl_freq_max   : 200.0
+# use_bodyrate_ctrl: true
+use_bodyrate_ctrl: false
+max_manual_vel: 1.0
+max_angle: 30  # Attitude angle limit in degree. A negative value means no limit.
+low_voltage: 13.2 # 4S battery
+
+rc_reverse: # *
+    roll: false
+    pitch: true
+    yaw: false
+    throttle: true
+
+auto_takeoff_land:
+    enable: true
+    enable_auto_arm: true
+    no_RC: false
+    takeoff_height: 1.0 # m
+    takeoff_land_speed: 0.3 # m/s
+
+thrust_model: # The model that maps thrust signal u(0~1) to real thrust force F(Unit:N): F=K1*Voltage^K2*(K3*u^2+(1-K3)*u). 
+    print_value: false # display the value of “thr_scale_compensate” or “hover_percentage” during thrust model estimating.
+    accurate_thrust_model: false  # This can always enabled if don't require accurate control performance :-)
+    noisy_imu: false # Strongly not recommended! Unless you really have no any ways to reduce drone vibration.
+    # accurate thrust mapping parameters
+    K1: 0.7583 # Needs precise calibration!
+    K2: 1.6942 # Needs precise calibration!
+    K3: 0.6786 # Needs precise calibration! K3 equals THR_MDL_FAC in https://docs.px4.io/master/en/config_mc/pid_tuning_guide_multicopter.html.
+    # approximate thrust mapping parameters
+    hover_percentage: 0.5  # Thrust percentage in Stabilize/Arco mode # *
+
+gain: 
+    # Cascade PID controller. Recommend to read the code.
+# xy aligned
+    Kp0: 4.5
+    Kp1: 4.0 
+    Kp2: 4.0
+    Kv0: 4.0
+    Kv1: 3.5
+    Kv2: 4.0
+# 45 degree
+    # Kp0: 4.8
+    # Kp1: 4.8
+    # Kp2: 4.0
+    # Kv0: 4.3
+    # Kv1: 4.3
+    # Kv2: 4.0
+    # ↓↓↓ No use now --
+    Kvi0: 0.0
+    Kvi1: 0.0
+    Kvi2: 0.0
+    Kvd0: 0.0
+    Kvd1: 0.0
+    Kvd2: 0.0
+    # ↓↓↓ Only used in rate control mode.
+    KAngR: 10.0
+    KAngP: 10.0
+    KAngY: 10.0
+
+rotor_drag:  
+    x: 0.0  # The reduced acceleration on each axis caused by rotor drag. Unit:(m*s^-2)/(m*s^-1).
+    y: 0.0  # Same as above
+    z: 0.0  # Same as above
+    k_thrust_horz: 0.0 # Set to 0 recommended... --
+
+msg_timeout:
+    odom: 0.5
+    rc:   0.5
+    cmd:  0.5
+    imu:  0.5
+    bat:  0.5
+    # airgrasp
+    theta: 0.5
+
+l1:
+    k_adapt: 2.0   # L1 自适应律增益
+    k_filt: 5.0    # L1 低通滤波器带宽
+    d_max: 3.0     # L1 干扰估计饱和限幅 (m/s^2)
+    k_a_lpf: 0.3   # 越大越猛
+    enable: false
+    # enable: true
+
+thetas:
+    theta_0_min: 0
+    theta_0_max: 1.57
+    theta_1_min: -1.57
+    theta_1_max: 1.57
+    theta_2_min: -3.14
+    theta_2_max: 3.14
+
+arm_compensation:
+    # enable: true
+    enable: false
+    wp_x: 10.0   # 增加 X 方向补偿
+    wp_y: 10.0
+    wp_z: 20.0
+    wr_x: 2.0    # 适当开启旋转补偿
+    wr_y: 2.0
+    wr_z: 5.0
+    alpha: 0.1   # 低通滤波系数 (0~1, 值越小滤波越强但延迟越大)

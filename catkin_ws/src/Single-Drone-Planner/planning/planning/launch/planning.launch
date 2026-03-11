@@ -1,0 +1,191 @@
+<launch>
+
+  <arg name="rhosVisibility_"/>
+  <arg name="rhoTracking_"/>
+  <arg name="target_name_"/>
+
+  <!-- <node pkg="nodelet" type="nodelet" name="plan_manage" args="manager" output="screen">
+    <param name="num_worker_threads" value="16"/>
+  </node> -->
+
+  <node pkg="nodelet" type="nodelet" name="planning" args="load planning/Nodelet manager" output="screen">
+    <remap from="~odom" to="odom"/>
+    <remap from="~gridmap_inflate" to="gridmap_inflate"/>
+    <remap from="~heartbeat" to="heartbeat"/>
+    <remap from="~trajectory" to="trajectory"/>
+    <remap from="~replanState" to="replanState"/>
+    <remap from="~target" to="$(arg target_name_)"/>
+    <remap from="~triger" to="/triger"/>
+    <remap from="~goal" to="/move_base_simple/goal"/>
+    <remap from="~land_triger" to="/land_triger"/>
+    <remap from="~joy" to="/joy_main"/>
+
+    <param name="plan_hz" value="20"/>
+
+    <param name="K" value="8"/>
+    <!-- drone vel change -->
+    <param name="vmax" value="3.0"/>
+    <param name="amax" value="4.0"/>
+    <param name="dyaw_max" value="3.14"/>
+
+    <param name="thrust_max" value="17.0"/>
+    <param name="thrust_min" value="5.0"/>
+    <param name="omega_max" value="0.5"/>
+    <param name="omega_yaw_max" value="1.5"/>
+
+    <param name="robot_l" value="0.02"/>
+    <param name="robot_r" value="0.13"/>
+    <param name="platform_r" value="1.0"/>
+    <param name="v_plus" value="0.3"/>
+
+    <!-- jerk -->
+    <!-- <param name="rhoT" value="10.0"/>
+    <param name="rhoP" value="500.0"/>
+    <param name="rhoV" value="10000.0"/>
+    <param name="rhoA" value="10000.0"/> -->
+    <param name="pause_debug" value="false"/>
+    <!-- <param name="pause_debug" value="true"/> -->
+    <!-- snap -->
+    <!-- <param name="rhoT" value="40"/>
+    <param name="rhoP" value="1000.0"/>
+    <param name="rhoV" value="1000.0"/>
+    <param name="rhoA" value="1000.0"/> -->
+
+    <param name="rhoT" value="1000"/>
+    <param name="rhoP" value="1000.0"/>
+    <param name="rhoV" value="1000.0"/>
+    <param name="rhoA" value="1000.0"/>
+
+
+    <param name="rhoVt" value="100000.0"/>
+    <param name="rhoThrust" value="10000.0"/>
+    <param name="rhoOmega" value="100000.0"/>
+    <param name="rhoPerchingCollision" value="1000000.0"/>
+
+    <param name="rhoDeformConsistAngle" value="0.0"/>
+    <param name="rhoDeformP" value="0.0"/>
+    <param name="rhoDeformVisibility" value="0.0"/>
+    <param name="rhoDeformDis" value="10.0"/>
+    <param name="rhoDeformAngle" value="5.0"/>
+
+    <param name="rhoTrackingDis" value="3.0"/>
+    <param name="rhoTrackingAngle" value="0.0"/>
+    <param name="rhoTrackingVisibility" value="50.0"/>
+    
+    <!-- <param name="rhoYaw" value="10000.0"/> -->
+    <param name="rhoDyaw" value="100.0"/>
+
+    <param name="tolerance_tracking_d" value="0.0"/>
+    <param name="tracking_dist" value="4.0"/>
+    <param name="tracking_dur" value="3.0"/>
+    <param name="collision_dis_thres" value="0.1"/>
+
+    <param name="rhoV_t" value="10000.0"/>
+    <param name="rhoA_t" value="10000.0"/>
+
+
+    <param name="rhoV_l" value="10000.0"/>
+    <param name="rhoA_l" value="10000.0"/>
+    <param name="rhoTracking_l" value="10.0"/>
+    <param name="tolerance_d_l" value="0.0"/>
+
+    <param name="rhoLanding_v" value="10.0"/>
+    <param name="landing_a_xy_limit" value="0.4"/>
+    <param name="landing_a_z_limit" value="0.1"/>
+
+    <param name="rhosVisibility" value="$(arg rhosVisibility_)"/>
+    <param name="theta_clearance" value="0.8"/>
+    <param name="clearance_d" value="0.2"/>
+    <param name="tolerance_d_astar" value="0.3"/>
+
+    <param name="landing_dur" value="3.0"/>
+    <param name="tracking_dt" value="0.5"/>
+    <param name="track_angle_vmax" value="0.5"/>
+    <param name="debug" value="false"/>
+
+    <param name="prediction/rho_a" value="1.0"/>
+    <param name="prediction/rho_domega" value="3.0"/>
+
+    <!-- predict car vel change -->
+    <param name="prediction/vmax" value="15.0"/>
+    <param name="prediction/omega_max" value="0.8"/>
+    <param name="prediction/pause_debug" value="false"/>
+
+
+
+
+    <remap from="~grid_map/odom" to="odom"/>
+    <remap from="~grid_map/cloud" to="local_cloud"/>
+
+    <param name="grid_map/resolution"      value="0.1" /> 
+    <param name="grid_map/map_size_x"   value="50.0" /> 
+    <param name="grid_map/map_size_y"   value="50.0" /> 
+    <param name="grid_map/map_size_z"   value="3.0" /> 
+    <param name="grid_map/local_update_range_x"  value="5.5" /> 
+    <param name="grid_map/local_update_range_y"  value="5.5" /> 
+    <param name="grid_map/local_update_range_z"  value="4.5" /> 
+    <param name="grid_map/obstacles_inflation"     value="0.199" /> 
+    <param name="grid_map/local_map_margin" value="10"/>
+    <param name="grid_map/ground_height"        value="-0.01"/>
+    <!-- camera parameter -->
+    <!-- <param name="grid_map/cx" value="$(arg cx)"/>
+    <param name="grid_map/cy" value="$(arg cy)"/>
+    <param name="grid_map/fx" value="$(arg fx)"/>
+    <param name="grid_map/fy" value="$(arg fy)"/> -->
+    <!-- depth filter -->
+    <param name="grid_map/use_depth_filter" value="true"/>
+    <param name="grid_map/depth_filter_tolerance" value="0.15"/>
+    <param name="grid_map/depth_filter_maxdist"   value="5.0"/>
+    <param name="grid_map/depth_filter_mindist"   value="0.2"/>
+    <param name="grid_map/depth_filter_margin"    value="2"/>
+    <param name="grid_map/k_depth_scaling_factor" value="1000.0"/>
+    <param name="grid_map/skip_pixel" value="2"/>
+    <!-- local fusion -->
+    <param name="grid_map/p_hit"  value="0.65"/>
+    <param name="grid_map/p_miss" value="0.35"/>
+    <param name="grid_map/p_min"  value="0.12"/>
+    <param name="grid_map/p_max"  value="0.90"/>
+    <param name="grid_map/p_occ"  value="0.80"/>
+    <param name="grid_map/min_ray_length" value="0.1"/>
+    <param name="grid_map/max_ray_length" value="5.5"/>
+
+    <param name="grid_map/virtual_ceil_height"   value="3.0"/>
+    <param name="grid_map/visualization_truncate_height"   value="2.9"/>
+    <param name="grid_map/show_occ_time"  value="false"/>
+    <param name="grid_map/pose_type"     value="1"/>  
+    <param name="grid_map/frame_id"      value="world"/>
+
+    <param name="grid_map/esdf_x_bound"  value="70"/>
+    <param name="grid_map/esdf_y_bound"  value="70"/>
+    <param name="grid_map/esdf_z_bound"  value="15"/>
+
+    <param name="grid_map/local_bound_inflate"  value="15"/>
+
+
+
+
+
+  </node>
+  <node pkg="planning" name="traj_server" type="traj_server" output="screen">
+    <remap from="~position_cmd" to="position_cmd"/>
+    <remap from="~trajectory" to="trajectory"/>
+    <remap from="~heartbeat" to="heartbeat"/>
+    <param name="time_forward" value="1.0" type="double"/>
+  </node>
+
+<!-- <node pkg="dynamic_planner" type="dynamic_planner_test_node" name="main_planner" output="screen">
+      <remap from="~dynamic_odom" to="odom"/>
+      <remap from="~position_cmd" to="position_cmd"/>
+      <remap from="~joy" to="/joy_main"/>
+
+      <param name="planning/init_state_x" value="$(arg init_x_)"/>
+      <param name="planning/init_state_y" value="$(arg init_y_)"/>
+      <param name="planning/init_state_z" value="$(arg init_z_)"/>
+      <param name="planning/isAuto" value="false"/>
+      <param name="planning/vehicleRadius" value="0.9"/>
+      <param name="planning/collisionDistance" value="3.0"/>
+      <param name="planning/plan_hz" value="10"/>
+      <param name="planning/ctrl_hz" value="40"/>
+</node> -->
+
+</launch>

@@ -1,0 +1,10 @@
+<launch>
+
+    <node pkg="ch_rc_sdf" name="test_node" type="test_node" output="screen">
+          <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml" />
+          <remap from="~uam_state_goal_vis" to="/px4ctrl/uam_state_goal_vis" />
+          <remap from="~uam_state_vis_marker" to="/px4ctrl/uam_state_vis_marker" />
+    </node>
+
+</launch>
+

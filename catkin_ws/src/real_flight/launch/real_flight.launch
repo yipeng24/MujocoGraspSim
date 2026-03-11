@@ -1,0 +1,117 @@
+<launch>
+  <!--
+    real_flight.launch — 真实硬件飞行启动文件
+    ==========================================
+    适用场景：接真实 MAVROS（飞控）+ 真实深度相机（如 RealSense D435）
+
+    与仿真的区别：
+      - 无 MuJoCo（不启动 mujoco_ros_bridge.py / mujoco_depth_pub.py）
+      - 无 mavros_sim（用真实 MAVROS 节点或已在外部启动的 MAVROS）
+      - 参数来自 real_camera.yaml，不修改仿真参数
+
+    启动前提：
+      1. MAVROS 已在其他 launch 中启动（或在下方取消注释 mavros 节点）
+      2. 深度相机 SDK 节点已启动并发布 SyncFrame 或点云
+      3. 根据实际相机填写 real_camera.yaml 中的 TODO 项
+
+    启动流程：
+      roslaunch real_flight real_flight.launch
+      rostopic pub -1 /px4ctrl/takeoff_land quadrotor_msgs/TakeoffLand "takeoff_land_cmd: 1"
+  -->
+
+  <param name="use_sim_time" value="false"/>
+
+  <!-- ================================================================ -->
+  <!-- 参数：可通过命令行覆盖                                             -->
+  <!-- ================================================================ -->
+  <arg name="config_path"  default="$(find real_flight)/config/real_camera.yaml"/>
+  <arg name="odom_topic"   default="/mavros/local_position/odom"/>  <!-- 真实里程计话题 -->
+
+  <!-- ================================================================ -->
+  <!-- 1. (可选) MAVROS — 如果外部已启动则注释掉此段                      -->
+  <!-- ================================================================ -->
+  <!--
+  <node pkg="mavros" type="mavros_node" name="mavros" output="screen">
+    <param name="fcu_url"  value="/dev/ttyUSB0:921600"/>
+    <param name="gcs_url"  value=""/>
+    <rosparam command="load" file="$(find mavros)/launch/px4_pluginlists.yaml"/>
+    <rosparam command="load" file="$(find mavros)/launch/px4_config.yaml"/>
+  </node>
+  -->
+
+  <!-- ================================================================ -->
+  <!-- 2. PX4 position controller                                        -->
+  <!-- Subscribes: /odom, /position_cmd, /mavros/*                      -->
+  <!-- Publishes:  /mavros/setpoint_raw/attitude                        -->
+  <!-- ================================================================ -->
+  <node pkg="px4ctrl" type="px4ctrl_node" name="px4ctrl" output="screen">
+
+    <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml"/>
+    <rosparam command="load" file="$(find px4ctrl)/config/ctrl_param_fpv.yaml"/>
+
+    <!-- 真实飞行：保留 RC 控制（yaml 默认 no_RC=false 即可） -->
+    <!-- 若要自动起飞无需遥控器，取消注释下一行 -->
+    <!-- <param name="auto_takeoff_land/no_RC" value="true"/> -->
+
+    <remap from="~odom"            to="$(arg odom_topic)"/>
+    <remap from="~cmd"             to="/position_cmd"/>
+    <remap from="~joint_state_est" to="/joint_states"/>
+    <remap from="~joint_state_cmd" to="/joint_state_cmd"/>
+    <remap from="~joy_cmd"         to="/joy_free"/>
+    <remap from="~takeoff_land"    to="/px4ctrl/takeoff_land"/>
+  </node>
+
+  <!-- ================================================================ -->
+  <!-- 3. 真实深度相机 SyncFrame 桥接节点                                 -->
+  <!-- 将相机点云 + 里程计打包为 SyncFrame 发给规划节点                    -->
+  <!-- TODO: 替换为你实际使用的相机桥接节点                                -->
+  <!-- ================================================================ -->
+  <!--
+    示例：如果你的相机节点已直接发布 /sync_frame_pcl_world，则无需此桥接。
+    如果只有点云话题，需要一个桥接节点把以下话题组合为 SyncFrame：
+      /camera/depth/points  (sensor_msgs/PointCloud2)
+      odom_topic            (nav_msgs/Odometry)
+      /camera/color/camera_info (sensor_msgs/CameraInfo)
+    并发布到 /sync_frame_pcl_world (quadrotor_msgs/SyncFrame)
+
+  <node pkg="real_flight" type="real_sync_bridge.py"
+        name="real_sync_bridge" output="screen">
+    <param name="pcl_topic"         value="/camera/depth/color/points"/>
+    <param name="odom_topic"        value="$(arg odom_topic)"/>
+    <param name="syncframe_topic"   value="/sync_frame_pcl_world"/>
+    <param name="publish_hz"        value="10.0"/>
+  </node>
+  -->
+
+  <!-- ================================================================ -->
+  <!-- 4. 规划节点（与仿真版完全相同，参数来自 real_camera.yaml）          -->
+  <!-- ================================================================ -->
+  <node pkg="planning" type="planning" name="planning" output="screen">
+
+    <param name="config_path" value="$(find planning)/config/config.yaml"/>
+
+    <rosparam command="load" file="$(find ch_rc_sdf)/config/params.yaml"/>
+
+    <!-- 从 real_camera.yaml 加载所有地图参数 -->
+    <rosparam command="load" file="$(arg config_path)"/>
+
+    <!-- SyncFrame 世界坐标系点云模式（不需要相机内参做反投影） -->
+    <param name="use_world_pcl"   value="true"/>
+    <param name="syncframe_topic" value="/sync_frame_pcl_world"/>
+
+    <!-- 可视化参数 -->
+    <param name="map_ros/frame_id"       value="world"/>
+    <param name="map_ros/show_all_map"   value="true"/>
+    <param name="map_ros/show_occ_time"  value="false"/>
+    <param name="map_ros/show_esdf_time" value="false"/>
+
+    <!-- 话题重映射 -->
+    <remap from="~odom"            to="$(arg odom_topic)"/>
+    <remap from="~goal"            to="/move_base_simple/goal"/>
+    <remap from="~triger"          to="/triger"/>
+    <remap from="~land_triger"     to="/land_triger"/>
+    <remap from="~joint_state_est" to="/joint_states"/>
+    <remap from="~position_cmd"    to="/position_cmd"/>
+  </node>
+
+</launch>

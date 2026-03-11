@@ -1,0 +1,34 @@
+# SetPayload.srv
+# ==============
+# 运行时动态修改飞机 payload 的质量和质心位置。
+# 服务名: /drone/set_payload
+# 仅在 use_payload:=true（加载 scene_drone_payload.xml）时可用。
+#
+# 示例（附着 0.2kg payload，质心偏移 0）：
+#   rosservice call /drone/set_payload "{mass: 0.2, com_x: 0.0, com_y: 0.0, com_z: 0.0, enable: true}"
+#
+# 示例（移除 payload，质量归零）：
+#   rosservice call /drone/set_payload "{mass: 0.0, com_x: 0.0, com_y: 0.0, com_z: 0.0, enable: false}"
+
+# --- Request ---
+
+# payload 质量 [kg]，enable=true 时生效
+float64 mass
+
+# 质心位置，相对于 payload body 原点（= gripper_frame = arm_roll_link +7cm 处）[m]
+float64 com_x
+float64 com_y
+float64 com_z
+
+# true=更新质量/质心并激活；false=将质量设为 0（等效去除）
+bool enable
+
+---
+
+# --- Response ---
+
+bool success
+string message
+
+# 修改后飞机子树总质量（含 payload）[kg]
+float64 total_mass

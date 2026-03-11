@@ -1,0 +1,26 @@
+<launch>  
+   
+  <node pkg="key_to_camPos" name="key2joy_node_free" type="key_to_joy_UAM.py" output="screen">
+  </node>
+
+  <node pkg="key_to_camPos" type="joy2camPos" name="joy2camPos_free" output="screen">
+
+    <param name="run_mode" value="1"/>
+    
+    <remap from="/joy2camPos_free/odom" to="/free_cam_pos"/>
+    <remap from="/joy" to="/joy_free"/>
+
+    <remap from="~joint_state_cmd" to="/joint_state_cmd"/>
+
+    <remap from="~uam_state_goal_cmd" to="/drone0/planning/uam_state_goal_cmd"/>
+    <remap from="~uam_state_goal_vis" to="/px4ctrl/uam_state_goal_vis"/>
+
+    <remap from="~target_pose" to="/vicon/hand_goal/hand_goal"/>
+
+    <remap from="~get_base_pose" to="/px4ctrl/get_base_pose"/>
+  </node>
+
+ </launch>
+
+
+

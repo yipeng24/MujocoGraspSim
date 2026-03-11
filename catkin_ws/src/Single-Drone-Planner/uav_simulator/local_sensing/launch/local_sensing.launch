@@ -1,0 +1,29 @@
+<launch>
+
+  <node pkg="local_sensing_node" type="pcl_render_node" name="pcl_render_tgt_node" output="screen">
+    <rosparam command="load" file="$(find local_sensing_node)/params/camera.yaml" />
+    <param name="sensing_horizon" value="3.0" />
+    <param name="sensing_rate" value="15.0"/>
+    <param name="estimation_rate" value="15.0"/>
+    <param name="splat_k" value="0.005"/>
+
+    <remap from="~global_map" to="/pcl_from_pcd/tgt_pcl"/>
+    <remap from="~odometry" to="/drone0/odom"/>
+    <remap from="~depth" to="/drone0/depth_tgt"/>
+    <remap from="~local_cloud" to="local_cloud_tgt"/>
+  </node>
+
+  <node pkg="local_sensing_node" type="pcl_render_node" name="pcl_render_env_node" output="screen">
+    <rosparam command="load" file="$(find local_sensing_node)/params/camera.yaml" />
+    <param name="sensing_horizon" value="3.0" />
+    <param name="sensing_rate" value="15.0"/>
+    <param name="estimation_rate" value="15.0"/>
+    <param name="splat_k" value="0.015"/>
+
+    <remap from="~global_map" to="/pcl_from_pcd/env_pcl"/>
+    <remap from="~odometry" to="/drone0/odom"/>
+    <remap from="~depth" to="/drone0/depth_env"/>
+    <remap from="~local_cloud" to="local_cloud_env"/>
+  </node>
+
+</launch>

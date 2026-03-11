@@ -1,0 +1,23 @@
+video_device: "/dev/video4"
+image_width: 1920
+image_height: 1200
+pixel_format: "mjpeg"
+io_method: "mmap"
+camera_frame_id: "head_camera"
+camera_name: "head_camera"
+framerate: 30
+
+intrinsic_controls:
+  ignore: ["white_balance_temperature", "camera_controls", "exposure_time_absolute", "exposure_dynamic_framerate"]
+
+brightness: 0
+contrast: 32
+saturation: 32
+hue: 0
+white_balance_automatic: true
+gamma: 150
+gain: 0
+power_line_frequency: 1
+sharpness: 2
+backlight_compensation: 40
+auto_exposure: 3
